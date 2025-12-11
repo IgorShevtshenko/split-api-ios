@@ -13,7 +13,7 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "SplitApi",
-             path: "./splitapi.xcframework.zip"
+             path: "./splitapi.xcframework"
         ),
     ]
 )
