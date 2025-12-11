@@ -13,8 +13,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "SplitApi",
-            url: "https://github.com/IgorShevtshenko/split-api/releases/download//splitapi.xcframework.zip",
-            checksum: "12e4a2dd9a50e464ea65d4519c9f546f44a6ce2462a6ce5c8bbbb552db6e7145"
+            url: "https://github.com/IgorShevtshenko/split-api/releases/download/1.2.0/splitapi.xcframework.zip",
+            checksum: "805ff347f97c7e50406070c67b7e4e3346acc3138fd3a15d34123e9deb576387"
         ),
     ]
 )
