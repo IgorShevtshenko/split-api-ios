@@ -1,5 +1,5 @@
-framework module "SplitApi" {
-    umbrella header "SplitApi.h"
+framework module "splitapi" {
+    umbrella header "splitapi.h"
 
     export *
     module * { export * }
