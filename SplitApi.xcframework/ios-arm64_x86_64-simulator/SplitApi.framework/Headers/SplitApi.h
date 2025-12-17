@@ -536,6 +536,18 @@ __attribute__((swift_name("NetworkClient")))
 - (void)executeMethod:(SplitApiHTTPMethod *)method path:(NSString *)path queryItems:(NSDictionary<NSString *, NSString *> *)queryItems body:(id _Nullable)body responseSerializer:(id<SplitApiKotlinx_serialization_coreKSerializer>)responseSerializer completionHandler:(void (^)(id<SplitApiNetworkResponse> _Nullable, NSError * _Nullable))completionHandler __attribute__((swift_name("execute(method:path:queryItems:body:responseSerializer:completionHandler:)")));
 @end
 
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("IOSNetworkClient")))
+@interface SplitApiIOSNetworkClient : SplitApiBase <SplitApiNetworkClient>
+- (instancetype)initWithEndpointConfiguration:(id<SplitApiEndpointConfiguration>)endpointConfiguration __attribute__((swift_name("init(endpointConfiguration:)"))) __attribute__((objc_designated_initializer));
+
+/**
+ * @note This method converts instances of CancellationException to errors.
+ * Other uncaught Kotlin exceptions are fatal.
+*/
+- (void)executeMethod:(SplitApiHTTPMethod *)method path:(NSString *)path queryItems:(NSDictionary<NSString *, NSString *> *)queryItems body:(id _Nullable)body responseSerializer:(id<SplitApiKotlinx_serialization_coreKSerializer>)responseSerializer completionHandler:(void (^)(id<SplitApiNetworkResponse> _Nullable, NSError * _Nullable))completionHandler __attribute__((swift_name("execute(method:path:queryItems:body:responseSerializer:completionHandler:)")));
+@end
+
 
 /**
  * @note annotations
@@ -659,7 +671,7 @@ __attribute__((swift_name("EndpointConfigurationImpl")))
 __attribute__((objc_subclassing_restricted))
 __attribute__((swift_name("NetworkClientImpl")))
 @interface SplitApiNetworkClientImpl : SplitApiBase <SplitApiNetworkClient>
-- (instancetype)initWithClient:(SplitApiKtor_client_coreHttpClient *)client endpointConfiguration:(id<SplitApiEndpointConfiguration>)endpointConfiguration __attribute__((swift_name("init(client:endpointConfiguration:)"))) __attribute__((objc_designated_initializer));
+- (instancetype)initWithEngine:(id<SplitApiKtor_client_coreHttpClientEngine>)engine endpointConfiguration:(id<SplitApiEndpointConfiguration>)endpointConfiguration __attribute__((swift_name("init(engine:endpointConfiguration:)"))) __attribute__((objc_designated_initializer));
 
 /**
  * @note This method converts instances of CancellationException to errors.
@@ -852,23 +864,19 @@ __attribute__((swift_name("Ktor_ioCloseable")))
 @required
 @end
 
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_client_coreHttpClient")))
-@interface SplitApiKtor_client_coreHttpClient : SplitApiBase <SplitApiKotlinx_coroutines_coreCoroutineScope, SplitApiKtor_ioCloseable>
-- (instancetype)initWithEngine:(id<SplitApiKtor_client_coreHttpClientEngine>)engine userConfig:(SplitApiKtor_client_coreHttpClientConfig<SplitApiKtor_client_coreHttpClientEngineConfig *> *)userConfig __attribute__((swift_name("init(engine:userConfig:)"))) __attribute__((objc_designated_initializer));
-- (void)close __attribute__((swift_name("close()")));
-- (SplitApiKtor_client_coreHttpClient *)configBlock:(void (^)(SplitApiKtor_client_coreHttpClientConfig<id> *))block __attribute__((swift_name("config(block:)")));
-- (BOOL)isSupportedCapability:(id<SplitApiKtor_client_coreHttpClientEngineCapability>)capability __attribute__((swift_name("isSupported(capability:)")));
-- (NSString *)description __attribute__((swift_name("description()")));
-@property (readonly) id<SplitApiKtor_utilsAttributes> attributes __attribute__((swift_name("attributes")));
-@property (readonly) id<SplitApiKotlinCoroutineContext> coroutineContext __attribute__((swift_name("coroutineContext")));
-@property (readonly) id<SplitApiKtor_client_coreHttpClientEngine> engine __attribute__((swift_name("engine")));
-@property (readonly) SplitApiKtor_client_coreHttpClientEngineConfig *engineConfig __attribute__((swift_name("engineConfig")));
-@property (readonly) SplitApiKtor_eventsEvents *monitor __attribute__((swift_name("monitor")));
-@property (readonly) SplitApiKtor_client_coreHttpReceivePipeline *receivePipeline __attribute__((swift_name("receivePipeline")));
-@property (readonly) SplitApiKtor_client_coreHttpRequestPipeline *requestPipeline __attribute__((swift_name("requestPipeline")));
-@property (readonly) SplitApiKtor_client_coreHttpResponsePipeline *responsePipeline __attribute__((swift_name("responsePipeline")));
-@property (readonly) SplitApiKtor_client_coreHttpSendPipeline *sendPipeline __attribute__((swift_name("sendPipeline")));
+__attribute__((swift_name("Ktor_client_coreHttpClientEngine")))
+@protocol SplitApiKtor_client_coreHttpClientEngine <SplitApiKotlinx_coroutines_coreCoroutineScope, SplitApiKtor_ioCloseable>
+@required
+
+/**
+ * @note This method converts instances of CancellationException to errors.
+ * Other uncaught Kotlin exceptions are fatal.
+*/
+- (void)executeData:(SplitApiKtor_client_coreHttpRequestData *)data completionHandler:(void (^)(SplitApiKtor_client_coreHttpResponseData * _Nullable, NSError * _Nullable))completionHandler __attribute__((swift_name("execute(data:completionHandler:)")));
+- (void)installClient:(SplitApiKtor_client_coreHttpClient *)client __attribute__((swift_name("install(client:)")));
+@property (readonly) SplitApiKtor_client_coreHttpClientEngineConfig *config __attribute__((swift_name("config")));
+@property (readonly) SplitApiKotlinx_coroutines_coreCoroutineDispatcher *dispatcher __attribute__((swift_name("dispatcher")));
+@property (readonly) NSSet<id<SplitApiKtor_client_coreHttpClientEngineCapability>> *supportedCapabilities __attribute__((swift_name("supportedCapabilities")));
 @end
 
 __attribute__((swift_name("Kotlinx_serialization_coreEncoder")))
@@ -1011,6 +1019,63 @@ __attribute__((swift_name("Ktor_httpURLProtocol")))
 @property (readonly) NSString *name __attribute__((swift_name("name")));
 @end
 
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_client_coreHttpRequestData")))
+@interface SplitApiKtor_client_coreHttpRequestData : SplitApiBase
+- (instancetype)initWithUrl:(SplitApiKtor_httpUrl *)url method:(SplitApiKtor_httpHttpMethod *)method headers:(id<SplitApiKtor_httpHeaders>)headers body:(SplitApiKtor_httpOutgoingContent *)body executionContext:(id<SplitApiKotlinx_coroutines_coreJob>)executionContext attributes:(id<SplitApiKtor_utilsAttributes>)attributes __attribute__((swift_name("init(url:method:headers:body:executionContext:attributes:)"))) __attribute__((objc_designated_initializer));
+- (id _Nullable)getCapabilityOrNullKey:(id<SplitApiKtor_client_coreHttpClientEngineCapability>)key __attribute__((swift_name("getCapabilityOrNull(key:)")));
+- (NSString *)description __attribute__((swift_name("description()")));
+@property (readonly) id<SplitApiKtor_utilsAttributes> attributes __attribute__((swift_name("attributes")));
+@property (readonly) SplitApiKtor_httpOutgoingContent *body __attribute__((swift_name("body")));
+@property (readonly) id<SplitApiKotlinx_coroutines_coreJob> executionContext __attribute__((swift_name("executionContext")));
+@property (readonly) id<SplitApiKtor_httpHeaders> headers __attribute__((swift_name("headers")));
+@property (readonly) SplitApiKtor_httpHttpMethod *method __attribute__((swift_name("method")));
+@property (readonly) SplitApiKtor_httpUrl *url __attribute__((swift_name("url")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_client_coreHttpResponseData")))
+@interface SplitApiKtor_client_coreHttpResponseData : SplitApiBase
+- (instancetype)initWithStatusCode:(SplitApiKtor_httpHttpStatusCode *)statusCode requestTime:(SplitApiKtor_utilsGMTDate *)requestTime headers:(id<SplitApiKtor_httpHeaders>)headers version:(SplitApiKtor_httpHttpProtocolVersion *)version body:(id)body callContext:(id<SplitApiKotlinCoroutineContext>)callContext __attribute__((swift_name("init(statusCode:requestTime:headers:version:body:callContext:)"))) __attribute__((objc_designated_initializer));
+- (NSString *)description __attribute__((swift_name("description()")));
+@property (readonly) id body __attribute__((swift_name("body")));
+@property (readonly) id<SplitApiKotlinCoroutineContext> callContext __attribute__((swift_name("callContext")));
+@property (readonly) id<SplitApiKtor_httpHeaders> headers __attribute__((swift_name("headers")));
+@property (readonly) SplitApiKtor_utilsGMTDate *requestTime __attribute__((swift_name("requestTime")));
+@property (readonly) SplitApiKtor_utilsGMTDate *responseTime __attribute__((swift_name("responseTime")));
+@property (readonly) SplitApiKtor_httpHttpStatusCode *statusCode __attribute__((swift_name("statusCode")));
+@property (readonly) SplitApiKtor_httpHttpProtocolVersion *version __attribute__((swift_name("version")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_client_coreHttpClient")))
+@interface SplitApiKtor_client_coreHttpClient : SplitApiBase <SplitApiKotlinx_coroutines_coreCoroutineScope, SplitApiKtor_ioCloseable>
+- (instancetype)initWithEngine:(id<SplitApiKtor_client_coreHttpClientEngine>)engine userConfig:(SplitApiKtor_client_coreHttpClientConfig<SplitApiKtor_client_coreHttpClientEngineConfig *> *)userConfig __attribute__((swift_name("init(engine:userConfig:)"))) __attribute__((objc_designated_initializer));
+- (void)close __attribute__((swift_name("close()")));
+- (SplitApiKtor_client_coreHttpClient *)configBlock:(void (^)(SplitApiKtor_client_coreHttpClientConfig<id> *))block __attribute__((swift_name("config(block:)")));
+- (BOOL)isSupportedCapability:(id<SplitApiKtor_client_coreHttpClientEngineCapability>)capability __attribute__((swift_name("isSupported(capability:)")));
+- (NSString *)description __attribute__((swift_name("description()")));
+@property (readonly) id<SplitApiKtor_utilsAttributes> attributes __attribute__((swift_name("attributes")));
+@property (readonly) id<SplitApiKotlinCoroutineContext> coroutineContext __attribute__((swift_name("coroutineContext")));
+@property (readonly) id<SplitApiKtor_client_coreHttpClientEngine> engine __attribute__((swift_name("engine")));
+@property (readonly) SplitApiKtor_client_coreHttpClientEngineConfig *engineConfig __attribute__((swift_name("engineConfig")));
+@property (readonly) SplitApiKtor_eventsEvents *monitor __attribute__((swift_name("monitor")));
+@property (readonly) SplitApiKtor_client_coreHttpReceivePipeline *receivePipeline __attribute__((swift_name("receivePipeline")));
+@property (readonly) SplitApiKtor_client_coreHttpRequestPipeline *requestPipeline __attribute__((swift_name("requestPipeline")));
+@property (readonly) SplitApiKtor_client_coreHttpResponsePipeline *responsePipeline __attribute__((swift_name("responsePipeline")));
+@property (readonly) SplitApiKtor_client_coreHttpSendPipeline *sendPipeline __attribute__((swift_name("sendPipeline")));
+@end
+
+__attribute__((swift_name("Ktor_client_coreHttpClientEngineConfig")))
+@interface SplitApiKtor_client_coreHttpClientEngineConfig : SplitApiBase
+- (instancetype)init __attribute__((swift_name("init()"))) __attribute__((objc_designated_initializer));
++ (instancetype)new __attribute__((availability(swift, unavailable, message="use object initializers instead")));
+@property SplitApiKotlinx_coroutines_coreCoroutineDispatcher * _Nullable dispatcher __attribute__((swift_name("dispatcher")));
+@property BOOL pipelining __attribute__((swift_name("pipelining")));
+@property SplitApiKtor_client_coreProxyConfig * _Nullable proxy __attribute__((swift_name("proxy")));
+@property int32_t threadsCount __attribute__((swift_name("threadsCount"))) __attribute__((unavailable("The [threadsCount] property is deprecated. Consider setting [dispatcher] instead.")));
+@end
+
 
 /**
  * @note annotations
@@ -1025,142 +1090,59 @@ __attribute__((swift_name("KotlinCoroutineContext")))
 - (id<SplitApiKotlinCoroutineContext>)plusContext:(id<SplitApiKotlinCoroutineContext>)context __attribute__((swift_name("plus(context:)")));
 @end
 
-__attribute__((swift_name("Ktor_client_coreHttpClientEngine")))
-@protocol SplitApiKtor_client_coreHttpClientEngine <SplitApiKotlinx_coroutines_coreCoroutineScope, SplitApiKtor_ioCloseable>
+__attribute__((swift_name("KotlinCoroutineContextElement")))
+@protocol SplitApiKotlinCoroutineContextElement <SplitApiKotlinCoroutineContext>
 @required
+@property (readonly) id<SplitApiKotlinCoroutineContextKey> key __attribute__((swift_name("key")));
+@end
+
 
 /**
- * @note This method converts instances of CancellationException to errors.
- * Other uncaught Kotlin exceptions are fatal.
+ * @note annotations
+ *   kotlin.SinceKotlin(version="1.3")
 */
-- (void)executeData:(SplitApiKtor_client_coreHttpRequestData *)data completionHandler:(void (^)(SplitApiKtor_client_coreHttpResponseData * _Nullable, NSError * _Nullable))completionHandler __attribute__((swift_name("execute(data:completionHandler:)")));
-- (void)installClient:(SplitApiKtor_client_coreHttpClient *)client __attribute__((swift_name("install(client:)")));
-@property (readonly) SplitApiKtor_client_coreHttpClientEngineConfig *config __attribute__((swift_name("config")));
-@property (readonly) SplitApiKotlinx_coroutines_coreCoroutineDispatcher *dispatcher __attribute__((swift_name("dispatcher")));
-@property (readonly) NSSet<id<SplitApiKtor_client_coreHttpClientEngineCapability>> *supportedCapabilities __attribute__((swift_name("supportedCapabilities")));
+__attribute__((swift_name("KotlinAbstractCoroutineContextElement")))
+@interface SplitApiKotlinAbstractCoroutineContextElement : SplitApiBase <SplitApiKotlinCoroutineContextElement>
+- (instancetype)initWithKey:(id<SplitApiKotlinCoroutineContextKey>)key __attribute__((swift_name("init(key:)"))) __attribute__((objc_designated_initializer));
+@property (readonly) id<SplitApiKotlinCoroutineContextKey> key __attribute__((swift_name("key")));
 @end
 
-__attribute__((swift_name("Ktor_client_coreHttpClientEngineConfig")))
-@interface SplitApiKtor_client_coreHttpClientEngineConfig : SplitApiBase
-- (instancetype)init __attribute__((swift_name("init()"))) __attribute__((objc_designated_initializer));
-+ (instancetype)new __attribute__((availability(swift, unavailable, message="use object initializers instead")));
-@property SplitApiKotlinx_coroutines_coreCoroutineDispatcher * _Nullable dispatcher __attribute__((swift_name("dispatcher")));
-@property BOOL pipelining __attribute__((swift_name("pipelining")));
-@property SplitApiKtor_client_coreProxyConfig * _Nullable proxy __attribute__((swift_name("proxy")));
-@property int32_t threadsCount __attribute__((swift_name("threadsCount"))) __attribute__((unavailable("The [threadsCount] property is deprecated. Consider setting [dispatcher] instead.")));
+
+/**
+ * @note annotations
+ *   kotlin.SinceKotlin(version="1.3")
+*/
+__attribute__((swift_name("KotlinContinuationInterceptor")))
+@protocol SplitApiKotlinContinuationInterceptor <SplitApiKotlinCoroutineContextElement>
+@required
+- (id<SplitApiKotlinContinuation>)interceptContinuationContinuation:(id<SplitApiKotlinContinuation>)continuation __attribute__((swift_name("interceptContinuation(continuation:)")));
+- (void)releaseInterceptedContinuationContinuation:(id<SplitApiKotlinContinuation>)continuation __attribute__((swift_name("releaseInterceptedContinuation(continuation:)")));
 @end
 
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_client_coreHttpClientConfig")))
-@interface SplitApiKtor_client_coreHttpClientConfig<T> : SplitApiBase
+__attribute__((swift_name("Kotlinx_coroutines_coreCoroutineDispatcher")))
+@interface SplitApiKotlinx_coroutines_coreCoroutineDispatcher : SplitApiKotlinAbstractCoroutineContextElement <SplitApiKotlinContinuationInterceptor>
 - (instancetype)init __attribute__((swift_name("init()"))) __attribute__((objc_designated_initializer));
 + (instancetype)new __attribute__((availability(swift, unavailable, message="use object initializers instead")));
-- (SplitApiKtor_client_coreHttpClientConfig<T> *)clone __attribute__((swift_name("clone()")));
-- (void)engineBlock:(void (^)(T))block __attribute__((swift_name("engine(block:)")));
-- (void)installClient:(SplitApiKtor_client_coreHttpClient *)client __attribute__((swift_name("install(client:)")));
-- (void)installPlugin:(id<SplitApiKtor_client_coreHttpClientPlugin>)plugin configure:(void (^)(id))configure __attribute__((swift_name("install(plugin:configure:)")));
-- (void)installKey:(NSString *)key block:(void (^)(SplitApiKtor_client_coreHttpClient *))block __attribute__((swift_name("install(key:block:)")));
-- (void)plusAssignOther:(SplitApiKtor_client_coreHttpClientConfig<T> *)other __attribute__((swift_name("plusAssign(other:)")));
-@property BOOL developmentMode __attribute__((swift_name("developmentMode"))) __attribute__((deprecated("Development mode is no longer required. The property will be removed in the future.")));
-@property BOOL expectSuccess __attribute__((swift_name("expectSuccess")));
-@property BOOL followRedirects __attribute__((swift_name("followRedirects")));
-@property BOOL useDefaultTransformers __attribute__((swift_name("useDefaultTransformers")));
+- (instancetype)initWithKey:(id<SplitApiKotlinCoroutineContextKey>)key __attribute__((swift_name("init(key:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
+@property (class, readonly, getter=companion) SplitApiKotlinx_coroutines_coreCoroutineDispatcherKey *companion __attribute__((swift_name("companion")));
+- (void)dispatchContext:(id<SplitApiKotlinCoroutineContext>)context block:(id<SplitApiKotlinx_coroutines_coreRunnable>)block __attribute__((swift_name("dispatch(context:block:)")));
+
+/**
+ * @note annotations
+ *   kotlinx.coroutines.InternalCoroutinesApi
+*/
+- (void)dispatchYieldContext:(id<SplitApiKotlinCoroutineContext>)context block:(id<SplitApiKotlinx_coroutines_coreRunnable>)block __attribute__((swift_name("dispatchYield(context:block:)")));
+- (id<SplitApiKotlinContinuation>)interceptContinuationContinuation:(id<SplitApiKotlinContinuation>)continuation __attribute__((swift_name("interceptContinuation(continuation:)")));
+- (BOOL)isDispatchNeededContext:(id<SplitApiKotlinCoroutineContext>)context __attribute__((swift_name("isDispatchNeeded(context:)")));
+- (SplitApiKotlinx_coroutines_coreCoroutineDispatcher *)limitedParallelismParallelism:(int32_t)parallelism name:(NSString * _Nullable)name __attribute__((swift_name("limitedParallelism(parallelism:name:)")));
+- (SplitApiKotlinx_coroutines_coreCoroutineDispatcher *)plusOther:(SplitApiKotlinx_coroutines_coreCoroutineDispatcher *)other __attribute__((swift_name("plus(other:)"))) __attribute__((unavailable("Operator '+' on two CoroutineDispatcher objects is meaningless. CoroutineDispatcher is a coroutine context element and `+` is a set-sum operator for coroutine contexts. The dispatcher to the right of `+` just replaces the dispatcher to the left.")));
+- (void)releaseInterceptedContinuationContinuation:(id<SplitApiKotlinContinuation>)continuation __attribute__((swift_name("releaseInterceptedContinuation(continuation:)")));
+- (NSString *)description __attribute__((swift_name("description()")));
 @end
 
 __attribute__((swift_name("Ktor_client_coreHttpClientEngineCapability")))
 @protocol SplitApiKtor_client_coreHttpClientEngineCapability
 @required
-@end
-
-__attribute__((swift_name("Ktor_utilsAttributes")))
-@protocol SplitApiKtor_utilsAttributes
-@required
-- (id)computeIfAbsentKey:(SplitApiKtor_utilsAttributeKey<id> *)key block:(id (^)(void))block __attribute__((swift_name("computeIfAbsent(key:block:)")));
-- (BOOL)containsKey:(SplitApiKtor_utilsAttributeKey<id> *)key __attribute__((swift_name("contains(key:)")));
-- (id)getKey_:(SplitApiKtor_utilsAttributeKey<id> *)key __attribute__((swift_name("get(key_:)")));
-- (id _Nullable)getOrNullKey:(SplitApiKtor_utilsAttributeKey<id> *)key __attribute__((swift_name("getOrNull(key:)")));
-- (void)putKey:(SplitApiKtor_utilsAttributeKey<id> *)key value:(id)value __attribute__((swift_name("put(key:value:)")));
-- (void)removeKey:(SplitApiKtor_utilsAttributeKey<id> *)key __attribute__((swift_name("remove(key:)")));
-- (void)setKey:(SplitApiKtor_utilsAttributeKey<id> *)key value:(id)value __attribute__((swift_name("set(key:value:)")));
-- (id)takeKey:(SplitApiKtor_utilsAttributeKey<id> *)key __attribute__((swift_name("take(key:)")));
-- (id _Nullable)takeOrNullKey:(SplitApiKtor_utilsAttributeKey<id> *)key __attribute__((swift_name("takeOrNull(key:)")));
-@property (readonly) NSArray<SplitApiKtor_utilsAttributeKey<id> *> *allKeys __attribute__((swift_name("allKeys")));
-@end
-
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_eventsEvents")))
-@interface SplitApiKtor_eventsEvents : SplitApiBase
-- (instancetype)init __attribute__((swift_name("init()"))) __attribute__((objc_designated_initializer));
-+ (instancetype)new __attribute__((availability(swift, unavailable, message="use object initializers instead")));
-- (void)raiseDefinition:(SplitApiKtor_eventsEventDefinition<id> *)definition value:(id _Nullable)value __attribute__((swift_name("raise(definition:value:)")));
-- (id<SplitApiKotlinx_coroutines_coreDisposableHandle>)subscribeDefinition:(SplitApiKtor_eventsEventDefinition<id> *)definition handler:(void (^)(id _Nullable))handler __attribute__((swift_name("subscribe(definition:handler:)")));
-- (void)unsubscribeDefinition:(SplitApiKtor_eventsEventDefinition<id> *)definition handler:(void (^)(id _Nullable))handler __attribute__((swift_name("unsubscribe(definition:handler:)")));
-@end
-
-__attribute__((swift_name("Ktor_utilsPipeline")))
-@interface SplitApiKtor_utilsPipeline<TSubject, TContext> : SplitApiBase
-- (instancetype)initWithPhases:(SplitApiKotlinArray<SplitApiKtor_utilsPipelinePhase *> *)phases __attribute__((swift_name("init(phases:)"))) __attribute__((objc_designated_initializer));
-- (instancetype)initWithPhase:(SplitApiKtor_utilsPipelinePhase *)phase interceptors:(NSArray<id<SplitApiKotlinSuspendFunction2>> *)interceptors __attribute__((swift_name("init(phase:interceptors:)"))) __attribute__((objc_designated_initializer));
-- (void)addPhasePhase:(SplitApiKtor_utilsPipelinePhase *)phase __attribute__((swift_name("addPhase(phase:)")));
-- (void)afterIntercepted __attribute__((swift_name("afterIntercepted()")));
-
-/**
- * @note This method converts instances of CancellationException to errors.
- * Other uncaught Kotlin exceptions are fatal.
-*/
-- (void)executeContext:(TContext)context subject:(TSubject)subject completionHandler:(void (^)(TSubject _Nullable, NSError * _Nullable))completionHandler __attribute__((swift_name("execute(context:subject:completionHandler:)")));
-- (void)insertPhaseAfterReference:(SplitApiKtor_utilsPipelinePhase *)reference phase:(SplitApiKtor_utilsPipelinePhase *)phase __attribute__((swift_name("insertPhaseAfter(reference:phase:)")));
-- (void)insertPhaseBeforeReference:(SplitApiKtor_utilsPipelinePhase *)reference phase:(SplitApiKtor_utilsPipelinePhase *)phase __attribute__((swift_name("insertPhaseBefore(reference:phase:)")));
-- (void)interceptPhase:(SplitApiKtor_utilsPipelinePhase *)phase block:(id<SplitApiKotlinSuspendFunction2>)block __attribute__((swift_name("intercept(phase:block:)")));
-- (NSArray<id<SplitApiKotlinSuspendFunction2>> *)interceptorsForPhasePhase:(SplitApiKtor_utilsPipelinePhase *)phase __attribute__((swift_name("interceptorsForPhase(phase:)")));
-- (void)mergeFrom:(SplitApiKtor_utilsPipeline<TSubject, TContext> *)from __attribute__((swift_name("merge(from:)")));
-- (void)mergePhasesFrom:(SplitApiKtor_utilsPipeline<TSubject, TContext> *)from __attribute__((swift_name("mergePhases(from:)")));
-- (void)resetFromFrom:(SplitApiKtor_utilsPipeline<TSubject, TContext> *)from __attribute__((swift_name("resetFrom(from:)")));
-- (NSString *)description __attribute__((swift_name("description()")));
-@property (readonly) id<SplitApiKtor_utilsAttributes> attributes __attribute__((swift_name("attributes")));
-@property (readonly) BOOL developmentMode __attribute__((swift_name("developmentMode")));
-@property (readonly, getter=isEmpty_) BOOL isEmpty __attribute__((swift_name("isEmpty")));
-@property (readonly) NSArray<SplitApiKtor_utilsPipelinePhase *> *items __attribute__((swift_name("items")));
-@end
-
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_client_coreHttpReceivePipeline")))
-@interface SplitApiKtor_client_coreHttpReceivePipeline : SplitApiKtor_utilsPipeline<SplitApiKtor_client_coreHttpResponse *, SplitApiKotlinUnit *>
-- (instancetype)initWithDevelopmentMode:(BOOL)developmentMode __attribute__((swift_name("init(developmentMode:)"))) __attribute__((objc_designated_initializer));
-- (instancetype)initWithPhases:(SplitApiKotlinArray<SplitApiKtor_utilsPipelinePhase *> *)phases __attribute__((swift_name("init(phases:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
-- (instancetype)initWithPhase:(SplitApiKtor_utilsPipelinePhase *)phase interceptors:(NSArray<id<SplitApiKotlinSuspendFunction2>> *)interceptors __attribute__((swift_name("init(phase:interceptors:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
-@property (class, readonly, getter=companion) SplitApiKtor_client_coreHttpReceivePipelinePhases *companion __attribute__((swift_name("companion")));
-@property (readonly) BOOL developmentMode __attribute__((swift_name("developmentMode")));
-@end
-
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_client_coreHttpRequestPipeline")))
-@interface SplitApiKtor_client_coreHttpRequestPipeline : SplitApiKtor_utilsPipeline<id, SplitApiKtor_client_coreHttpRequestBuilder *>
-- (instancetype)initWithDevelopmentMode:(BOOL)developmentMode __attribute__((swift_name("init(developmentMode:)"))) __attribute__((objc_designated_initializer));
-- (instancetype)initWithPhases:(SplitApiKotlinArray<SplitApiKtor_utilsPipelinePhase *> *)phases __attribute__((swift_name("init(phases:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
-- (instancetype)initWithPhase:(SplitApiKtor_utilsPipelinePhase *)phase interceptors:(NSArray<id<SplitApiKotlinSuspendFunction2>> *)interceptors __attribute__((swift_name("init(phase:interceptors:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
-@property (class, readonly, getter=companion) SplitApiKtor_client_coreHttpRequestPipelinePhases *companion __attribute__((swift_name("companion")));
-@property (readonly) BOOL developmentMode __attribute__((swift_name("developmentMode")));
-@end
-
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_client_coreHttpResponsePipeline")))
-@interface SplitApiKtor_client_coreHttpResponsePipeline : SplitApiKtor_utilsPipeline<SplitApiKtor_client_coreHttpResponseContainer *, SplitApiKtor_client_coreHttpClientCall *>
-- (instancetype)initWithDevelopmentMode:(BOOL)developmentMode __attribute__((swift_name("init(developmentMode:)"))) __attribute__((objc_designated_initializer));
-- (instancetype)initWithPhases:(SplitApiKotlinArray<SplitApiKtor_utilsPipelinePhase *> *)phases __attribute__((swift_name("init(phases:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
-- (instancetype)initWithPhase:(SplitApiKtor_utilsPipelinePhase *)phase interceptors:(NSArray<id<SplitApiKotlinSuspendFunction2>> *)interceptors __attribute__((swift_name("init(phase:interceptors:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
-@property (class, readonly, getter=companion) SplitApiKtor_client_coreHttpResponsePipelinePhases *companion __attribute__((swift_name("companion")));
-@property (readonly) BOOL developmentMode __attribute__((swift_name("developmentMode")));
-@end
-
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_client_coreHttpSendPipeline")))
-@interface SplitApiKtor_client_coreHttpSendPipeline : SplitApiKtor_utilsPipeline<id, SplitApiKtor_client_coreHttpRequestBuilder *>
-- (instancetype)initWithDevelopmentMode:(BOOL)developmentMode __attribute__((swift_name("init(developmentMode:)"))) __attribute__((objc_designated_initializer));
-- (instancetype)initWithPhases:(SplitApiKotlinArray<SplitApiKtor_utilsPipelinePhase *> *)phases __attribute__((swift_name("init(phases:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
-- (instancetype)initWithPhase:(SplitApiKtor_utilsPipelinePhase *)phase interceptors:(NSArray<id<SplitApiKotlinSuspendFunction2>> *)interceptors __attribute__((swift_name("init(phase:interceptors:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
-@property (class, readonly, getter=companion) SplitApiKtor_client_coreHttpSendPipelinePhases *companion __attribute__((swift_name("companion")));
-@property (readonly) BOOL developmentMode __attribute__((swift_name("developmentMode")));
 @end
 
 __attribute__((swift_name("Kotlinx_serialization_coreCompositeEncoder")))
@@ -1292,366 +1274,6 @@ __attribute__((swift_name("Ktor_httpURLProtocol.Companion")))
 @property (readonly) NSDictionary<NSString *, SplitApiKtor_httpURLProtocol *> *byName __attribute__((swift_name("byName")));
 @end
 
-__attribute__((swift_name("KotlinCoroutineContextElement")))
-@protocol SplitApiKotlinCoroutineContextElement <SplitApiKotlinCoroutineContext>
-@required
-@property (readonly) id<SplitApiKotlinCoroutineContextKey> key __attribute__((swift_name("key")));
-@end
-
-__attribute__((swift_name("KotlinCoroutineContextKey")))
-@protocol SplitApiKotlinCoroutineContextKey
-@required
-@end
-
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_client_coreHttpRequestData")))
-@interface SplitApiKtor_client_coreHttpRequestData : SplitApiBase
-- (instancetype)initWithUrl:(SplitApiKtor_httpUrl *)url method:(SplitApiKtor_httpHttpMethod *)method headers:(id<SplitApiKtor_httpHeaders>)headers body:(SplitApiKtor_httpOutgoingContent *)body executionContext:(id<SplitApiKotlinx_coroutines_coreJob>)executionContext attributes:(id<SplitApiKtor_utilsAttributes>)attributes __attribute__((swift_name("init(url:method:headers:body:executionContext:attributes:)"))) __attribute__((objc_designated_initializer));
-- (id _Nullable)getCapabilityOrNullKey:(id<SplitApiKtor_client_coreHttpClientEngineCapability>)key __attribute__((swift_name("getCapabilityOrNull(key:)")));
-- (NSString *)description __attribute__((swift_name("description()")));
-@property (readonly) id<SplitApiKtor_utilsAttributes> attributes __attribute__((swift_name("attributes")));
-@property (readonly) SplitApiKtor_httpOutgoingContent *body __attribute__((swift_name("body")));
-@property (readonly) id<SplitApiKotlinx_coroutines_coreJob> executionContext __attribute__((swift_name("executionContext")));
-@property (readonly) id<SplitApiKtor_httpHeaders> headers __attribute__((swift_name("headers")));
-@property (readonly) SplitApiKtor_httpHttpMethod *method __attribute__((swift_name("method")));
-@property (readonly) SplitApiKtor_httpUrl *url __attribute__((swift_name("url")));
-@end
-
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_client_coreHttpResponseData")))
-@interface SplitApiKtor_client_coreHttpResponseData : SplitApiBase
-- (instancetype)initWithStatusCode:(SplitApiKtor_httpHttpStatusCode *)statusCode requestTime:(SplitApiKtor_utilsGMTDate *)requestTime headers:(id<SplitApiKtor_httpHeaders>)headers version:(SplitApiKtor_httpHttpProtocolVersion *)version body:(id)body callContext:(id<SplitApiKotlinCoroutineContext>)callContext __attribute__((swift_name("init(statusCode:requestTime:headers:version:body:callContext:)"))) __attribute__((objc_designated_initializer));
-- (NSString *)description __attribute__((swift_name("description()")));
-@property (readonly) id body __attribute__((swift_name("body")));
-@property (readonly) id<SplitApiKotlinCoroutineContext> callContext __attribute__((swift_name("callContext")));
-@property (readonly) id<SplitApiKtor_httpHeaders> headers __attribute__((swift_name("headers")));
-@property (readonly) SplitApiKtor_utilsGMTDate *requestTime __attribute__((swift_name("requestTime")));
-@property (readonly) SplitApiKtor_utilsGMTDate *responseTime __attribute__((swift_name("responseTime")));
-@property (readonly) SplitApiKtor_httpHttpStatusCode *statusCode __attribute__((swift_name("statusCode")));
-@property (readonly) SplitApiKtor_httpHttpProtocolVersion *version __attribute__((swift_name("version")));
-@end
-
-
-/**
- * @note annotations
- *   kotlin.SinceKotlin(version="1.3")
-*/
-__attribute__((swift_name("KotlinAbstractCoroutineContextElement")))
-@interface SplitApiKotlinAbstractCoroutineContextElement : SplitApiBase <SplitApiKotlinCoroutineContextElement>
-- (instancetype)initWithKey:(id<SplitApiKotlinCoroutineContextKey>)key __attribute__((swift_name("init(key:)"))) __attribute__((objc_designated_initializer));
-@property (readonly) id<SplitApiKotlinCoroutineContextKey> key __attribute__((swift_name("key")));
-@end
-
-
-/**
- * @note annotations
- *   kotlin.SinceKotlin(version="1.3")
-*/
-__attribute__((swift_name("KotlinContinuationInterceptor")))
-@protocol SplitApiKotlinContinuationInterceptor <SplitApiKotlinCoroutineContextElement>
-@required
-- (id<SplitApiKotlinContinuation>)interceptContinuationContinuation:(id<SplitApiKotlinContinuation>)continuation __attribute__((swift_name("interceptContinuation(continuation:)")));
-- (void)releaseInterceptedContinuationContinuation:(id<SplitApiKotlinContinuation>)continuation __attribute__((swift_name("releaseInterceptedContinuation(continuation:)")));
-@end
-
-__attribute__((swift_name("Kotlinx_coroutines_coreCoroutineDispatcher")))
-@interface SplitApiKotlinx_coroutines_coreCoroutineDispatcher : SplitApiKotlinAbstractCoroutineContextElement <SplitApiKotlinContinuationInterceptor>
-- (instancetype)init __attribute__((swift_name("init()"))) __attribute__((objc_designated_initializer));
-+ (instancetype)new __attribute__((availability(swift, unavailable, message="use object initializers instead")));
-- (instancetype)initWithKey:(id<SplitApiKotlinCoroutineContextKey>)key __attribute__((swift_name("init(key:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
-@property (class, readonly, getter=companion) SplitApiKotlinx_coroutines_coreCoroutineDispatcherKey *companion __attribute__((swift_name("companion")));
-- (void)dispatchContext:(id<SplitApiKotlinCoroutineContext>)context block:(id<SplitApiKotlinx_coroutines_coreRunnable>)block __attribute__((swift_name("dispatch(context:block:)")));
-
-/**
- * @note annotations
- *   kotlinx.coroutines.InternalCoroutinesApi
-*/
-- (void)dispatchYieldContext:(id<SplitApiKotlinCoroutineContext>)context block:(id<SplitApiKotlinx_coroutines_coreRunnable>)block __attribute__((swift_name("dispatchYield(context:block:)")));
-- (id<SplitApiKotlinContinuation>)interceptContinuationContinuation:(id<SplitApiKotlinContinuation>)continuation __attribute__((swift_name("interceptContinuation(continuation:)")));
-- (BOOL)isDispatchNeededContext:(id<SplitApiKotlinCoroutineContext>)context __attribute__((swift_name("isDispatchNeeded(context:)")));
-- (SplitApiKotlinx_coroutines_coreCoroutineDispatcher *)limitedParallelismParallelism:(int32_t)parallelism name:(NSString * _Nullable)name __attribute__((swift_name("limitedParallelism(parallelism:name:)")));
-- (SplitApiKotlinx_coroutines_coreCoroutineDispatcher *)plusOther:(SplitApiKotlinx_coroutines_coreCoroutineDispatcher *)other __attribute__((swift_name("plus(other:)"))) __attribute__((unavailable("Operator '+' on two CoroutineDispatcher objects is meaningless. CoroutineDispatcher is a coroutine context element and `+` is a set-sum operator for coroutine contexts. The dispatcher to the right of `+` just replaces the dispatcher to the left.")));
-- (void)releaseInterceptedContinuationContinuation:(id<SplitApiKotlinContinuation>)continuation __attribute__((swift_name("releaseInterceptedContinuation(continuation:)")));
-- (NSString *)description __attribute__((swift_name("description()")));
-@end
-
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_client_coreProxyConfig")))
-@interface SplitApiKtor_client_coreProxyConfig : SplitApiBase
-- (instancetype)initWithUrl:(SplitApiKtor_httpUrl *)url __attribute__((swift_name("init(url:)"))) __attribute__((objc_designated_initializer));
-- (NSString *)description __attribute__((swift_name("description()")));
-@property (readonly) SplitApiKtor_httpUrl *url __attribute__((swift_name("url")));
-@end
-
-__attribute__((swift_name("Ktor_client_coreHttpClientPlugin")))
-@protocol SplitApiKtor_client_coreHttpClientPlugin
-@required
-- (void)installPlugin:(id)plugin scope:(SplitApiKtor_client_coreHttpClient *)scope __attribute__((swift_name("install(plugin:scope:)")));
-- (id)prepareBlock:(void (^)(id))block __attribute__((swift_name("prepare(block:)")));
-@property (readonly) SplitApiKtor_utilsAttributeKey<id> *key __attribute__((swift_name("key")));
-@end
-
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_utilsAttributeKey")))
-@interface SplitApiKtor_utilsAttributeKey<T> : SplitApiBase
-
-/**
- * @note annotations
- *   kotlin.jvm.JvmOverloads
-*/
-- (instancetype)initWithName:(NSString *)name type:(SplitApiKtor_utilsTypeInfo *)type __attribute__((swift_name("init(name:type:)"))) __attribute__((objc_designated_initializer));
-- (SplitApiKtor_utilsAttributeKey<T> *)doCopyName:(NSString *)name type:(SplitApiKtor_utilsTypeInfo *)type __attribute__((swift_name("doCopy(name:type:)")));
-- (BOOL)isEqual:(id _Nullable)other __attribute__((swift_name("isEqual(_:)")));
-- (NSUInteger)hash __attribute__((swift_name("hash()")));
-- (NSString *)description __attribute__((swift_name("description()")));
-@property (readonly) NSString *name __attribute__((swift_name("name")));
-@end
-
-__attribute__((swift_name("Ktor_eventsEventDefinition")))
-@interface SplitApiKtor_eventsEventDefinition<T> : SplitApiBase
-- (instancetype)init __attribute__((swift_name("init()"))) __attribute__((objc_designated_initializer));
-+ (instancetype)new __attribute__((availability(swift, unavailable, message="use object initializers instead")));
-@end
-
-__attribute__((swift_name("Kotlinx_coroutines_coreDisposableHandle")))
-@protocol SplitApiKotlinx_coroutines_coreDisposableHandle
-@required
-- (void)dispose __attribute__((swift_name("dispose()")));
-@end
-
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_utilsPipelinePhase")))
-@interface SplitApiKtor_utilsPipelinePhase : SplitApiBase
-- (instancetype)initWithName:(NSString *)name __attribute__((swift_name("init(name:)"))) __attribute__((objc_designated_initializer));
-- (NSString *)description __attribute__((swift_name("description()")));
-@property (readonly) NSString *name __attribute__((swift_name("name")));
-@end
-
-__attribute__((swift_name("KotlinFunction")))
-@protocol SplitApiKotlinFunction
-@required
-@end
-
-__attribute__((swift_name("KotlinSuspendFunction2")))
-@protocol SplitApiKotlinSuspendFunction2 <SplitApiKotlinFunction>
-@required
-
-/**
- * @note This method converts instances of CancellationException to errors.
- * Other uncaught Kotlin exceptions are fatal.
-*/
-- (void)invokeP1:(id _Nullable)p1 p2:(id _Nullable)p2 completionHandler:(void (^)(id _Nullable_result, NSError * _Nullable))completionHandler __attribute__((swift_name("invoke(p1:p2:completionHandler:)")));
-@end
-
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_client_coreHttpReceivePipeline.Phases")))
-@interface SplitApiKtor_client_coreHttpReceivePipelinePhases : SplitApiBase
-+ (instancetype)alloc __attribute__((unavailable));
-+ (instancetype)allocWithZone:(struct _NSZone *)zone __attribute__((unavailable));
-+ (instancetype)phases __attribute__((swift_name("init()")));
-@property (class, readonly, getter=shared) SplitApiKtor_client_coreHttpReceivePipelinePhases *shared __attribute__((swift_name("shared")));
-@property (readonly) SplitApiKtor_utilsPipelinePhase *After __attribute__((swift_name("After")));
-@property (readonly) SplitApiKtor_utilsPipelinePhase *Before __attribute__((swift_name("Before")));
-@property (readonly) SplitApiKtor_utilsPipelinePhase *State __attribute__((swift_name("State")));
-@end
-
-__attribute__((swift_name("Ktor_httpHttpMessage")))
-@protocol SplitApiKtor_httpHttpMessage
-@required
-@property (readonly, getter=headers_) id<SplitApiKtor_httpHeaders> headers __attribute__((swift_name("headers")));
-@end
-
-__attribute__((swift_name("Ktor_client_coreHttpResponse")))
-@interface SplitApiKtor_client_coreHttpResponse : SplitApiBase <SplitApiKtor_httpHttpMessage, SplitApiKotlinx_coroutines_coreCoroutineScope>
-- (instancetype)init __attribute__((swift_name("init()"))) __attribute__((objc_designated_initializer));
-+ (instancetype)new __attribute__((availability(swift, unavailable, message="use object initializers instead")));
-- (NSString *)description __attribute__((swift_name("description()")));
-@property (readonly) SplitApiKtor_client_coreHttpClientCall *call __attribute__((swift_name("call")));
-@property (readonly) id<SplitApiKtor_ioByteReadChannel> rawContent __attribute__((swift_name("rawContent")));
-@property (readonly) SplitApiKtor_utilsGMTDate *requestTime __attribute__((swift_name("requestTime")));
-@property (readonly) SplitApiKtor_utilsGMTDate *responseTime __attribute__((swift_name("responseTime")));
-@property (readonly) SplitApiKtor_httpHttpStatusCode *status __attribute__((swift_name("status")));
-@property (readonly) SplitApiKtor_httpHttpProtocolVersion *version __attribute__((swift_name("version")));
-@end
-
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("KotlinUnit")))
-@interface SplitApiKotlinUnit : SplitApiBase
-+ (instancetype)alloc __attribute__((unavailable));
-+ (instancetype)allocWithZone:(struct _NSZone *)zone __attribute__((unavailable));
-+ (instancetype)unit __attribute__((swift_name("init()")));
-@property (class, readonly, getter=shared) SplitApiKotlinUnit *shared __attribute__((swift_name("shared")));
-- (NSString *)description __attribute__((swift_name("description()")));
-@end
-
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_client_coreHttpRequestPipeline.Phases")))
-@interface SplitApiKtor_client_coreHttpRequestPipelinePhases : SplitApiBase
-+ (instancetype)alloc __attribute__((unavailable));
-+ (instancetype)allocWithZone:(struct _NSZone *)zone __attribute__((unavailable));
-+ (instancetype)phases __attribute__((swift_name("init()")));
-@property (class, readonly, getter=shared) SplitApiKtor_client_coreHttpRequestPipelinePhases *shared __attribute__((swift_name("shared")));
-@property (readonly) SplitApiKtor_utilsPipelinePhase *Before __attribute__((swift_name("Before")));
-@property (readonly) SplitApiKtor_utilsPipelinePhase *Render __attribute__((swift_name("Render")));
-@property (readonly) SplitApiKtor_utilsPipelinePhase *Send __attribute__((swift_name("Send")));
-@property (readonly) SplitApiKtor_utilsPipelinePhase *State __attribute__((swift_name("State")));
-@property (readonly) SplitApiKtor_utilsPipelinePhase *Transform __attribute__((swift_name("Transform")));
-@end
-
-__attribute__((swift_name("Ktor_httpHttpMessageBuilder")))
-@protocol SplitApiKtor_httpHttpMessageBuilder
-@required
-@property (readonly, getter=headers_) SplitApiKtor_httpHeadersBuilder *headers __attribute__((swift_name("headers")));
-@end
-
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_client_coreHttpRequestBuilder")))
-@interface SplitApiKtor_client_coreHttpRequestBuilder : SplitApiBase <SplitApiKtor_httpHttpMessageBuilder>
-- (instancetype)init __attribute__((swift_name("init()"))) __attribute__((objc_designated_initializer));
-+ (instancetype)new __attribute__((availability(swift, unavailable, message="use object initializers instead")));
-@property (class, readonly, getter=companion) SplitApiKtor_client_coreHttpRequestBuilderCompanion *companion __attribute__((swift_name("companion")));
-- (SplitApiKtor_client_coreHttpRequestData *)build __attribute__((swift_name("build()")));
-- (id _Nullable)getCapabilityOrNullKey:(id<SplitApiKtor_client_coreHttpClientEngineCapability>)key __attribute__((swift_name("getCapabilityOrNull(key:)")));
-- (void)setAttributesBlock:(void (^)(id<SplitApiKtor_utilsAttributes>))block __attribute__((swift_name("setAttributes(block:)")));
-- (void)setCapabilityKey:(id<SplitApiKtor_client_coreHttpClientEngineCapability>)key capability:(id)capability __attribute__((swift_name("setCapability(key:capability:)")));
-- (SplitApiKtor_client_coreHttpRequestBuilder *)takeFromBuilder:(SplitApiKtor_client_coreHttpRequestBuilder *)builder __attribute__((swift_name("takeFrom(builder:)")));
-- (SplitApiKtor_client_coreHttpRequestBuilder *)takeFromWithExecutionContextBuilder:(SplitApiKtor_client_coreHttpRequestBuilder *)builder __attribute__((swift_name("takeFromWithExecutionContext(builder:)")));
-- (void)urlBlock:(void (^)(SplitApiKtor_httpURLBuilder *, SplitApiKtor_httpURLBuilder *))block __attribute__((swift_name("url(block:)")));
-@property (readonly) id<SplitApiKtor_utilsAttributes> attributes __attribute__((swift_name("attributes")));
-@property id body __attribute__((swift_name("body")));
-@property SplitApiKtor_utilsTypeInfo * _Nullable bodyType __attribute__((swift_name("bodyType")));
-@property (readonly) id<SplitApiKotlinx_coroutines_coreJob> executionContext __attribute__((swift_name("executionContext")));
-@property (readonly, getter=headers_) SplitApiKtor_httpHeadersBuilder *headers __attribute__((swift_name("headers")));
-@property SplitApiKtor_httpHttpMethod *method __attribute__((swift_name("method")));
-@property (readonly) SplitApiKtor_httpURLBuilder *url __attribute__((swift_name("url")));
-@end
-
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_client_coreHttpResponsePipeline.Phases")))
-@interface SplitApiKtor_client_coreHttpResponsePipelinePhases : SplitApiBase
-+ (instancetype)alloc __attribute__((unavailable));
-+ (instancetype)allocWithZone:(struct _NSZone *)zone __attribute__((unavailable));
-+ (instancetype)phases __attribute__((swift_name("init()")));
-@property (class, readonly, getter=shared) SplitApiKtor_client_coreHttpResponsePipelinePhases *shared __attribute__((swift_name("shared")));
-@property (readonly) SplitApiKtor_utilsPipelinePhase *After __attribute__((swift_name("After")));
-@property (readonly) SplitApiKtor_utilsPipelinePhase *Parse __attribute__((swift_name("Parse")));
-@property (readonly) SplitApiKtor_utilsPipelinePhase *Receive __attribute__((swift_name("Receive")));
-@property (readonly) SplitApiKtor_utilsPipelinePhase *State __attribute__((swift_name("State")));
-@property (readonly) SplitApiKtor_utilsPipelinePhase *Transform __attribute__((swift_name("Transform")));
-@end
-
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_client_coreHttpResponseContainer")))
-@interface SplitApiKtor_client_coreHttpResponseContainer : SplitApiBase
-- (instancetype)initWithExpectedType:(SplitApiKtor_utilsTypeInfo *)expectedType response:(id)response __attribute__((swift_name("init(expectedType:response:)"))) __attribute__((objc_designated_initializer));
-- (SplitApiKtor_client_coreHttpResponseContainer *)doCopyExpectedType:(SplitApiKtor_utilsTypeInfo *)expectedType response:(id)response __attribute__((swift_name("doCopy(expectedType:response:)")));
-- (BOOL)isEqual:(id _Nullable)other __attribute__((swift_name("isEqual(_:)")));
-- (NSUInteger)hash __attribute__((swift_name("hash()")));
-- (NSString *)description __attribute__((swift_name("description()")));
-@property (readonly) SplitApiKtor_utilsTypeInfo *expectedType __attribute__((swift_name("expectedType")));
-@property (readonly) id response __attribute__((swift_name("response")));
-@end
-
-__attribute__((swift_name("Ktor_client_coreHttpClientCall")))
-@interface SplitApiKtor_client_coreHttpClientCall : SplitApiBase <SplitApiKotlinx_coroutines_coreCoroutineScope>
-- (instancetype)initWithClient:(SplitApiKtor_client_coreHttpClient *)client __attribute__((swift_name("init(client:)"))) __attribute__((objc_designated_initializer));
-- (instancetype)initWithClient:(SplitApiKtor_client_coreHttpClient *)client requestData:(SplitApiKtor_client_coreHttpRequestData *)requestData responseData:(SplitApiKtor_client_coreHttpResponseData *)responseData __attribute__((swift_name("init(client:requestData:responseData:)"))) __attribute__((objc_designated_initializer));
-@property (class, readonly, getter=companion) SplitApiKtor_client_coreHttpClientCallCompanion *companion __attribute__((swift_name("companion")));
-
-/**
- * @note This method converts instances of CancellationException to errors.
- * Other uncaught Kotlin exceptions are fatal.
-*/
-- (void)bodyInfo:(SplitApiKtor_utilsTypeInfo *)info completionHandler:(void (^)(id _Nullable, NSError * _Nullable))completionHandler __attribute__((swift_name("body(info:completionHandler:)")));
-
-/**
- * @note This method converts instances of CancellationException to errors.
- * Other uncaught Kotlin exceptions are fatal.
-*/
-- (void)bodyNullableInfo:(SplitApiKtor_utilsTypeInfo *)info completionHandler:(void (^)(id _Nullable_result, NSError * _Nullable))completionHandler __attribute__((swift_name("bodyNullable(info:completionHandler:)")));
-
-/**
- * @note This method converts instances of CancellationException to errors.
- * Other uncaught Kotlin exceptions are fatal.
- * @note This method has protected visibility in Kotlin source and is intended only for use by subclasses.
-*/
-- (void)getResponseContentWithCompletionHandler:(void (^)(id<SplitApiKtor_ioByteReadChannel> _Nullable, NSError * _Nullable))completionHandler __attribute__((swift_name("getResponseContent(completionHandler:)")));
-- (NSString *)description __attribute__((swift_name("description()")));
-
-/**
- * @note This property has protected visibility in Kotlin source and is intended only for use by subclasses.
-*/
-@property (readonly) BOOL allowDoubleReceive __attribute__((swift_name("allowDoubleReceive")));
-@property (readonly) id<SplitApiKtor_utilsAttributes> attributes __attribute__((swift_name("attributes")));
-@property (readonly) SplitApiKtor_client_coreHttpClient *client __attribute__((swift_name("client")));
-@property (readonly) id<SplitApiKotlinCoroutineContext> coroutineContext __attribute__((swift_name("coroutineContext")));
-@property id<SplitApiKtor_client_coreHttpRequest> request __attribute__((swift_name("request")));
-@property SplitApiKtor_client_coreHttpResponse *response __attribute__((swift_name("response")));
-@end
-
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_client_coreHttpSendPipeline.Phases")))
-@interface SplitApiKtor_client_coreHttpSendPipelinePhases : SplitApiBase
-+ (instancetype)alloc __attribute__((unavailable));
-+ (instancetype)allocWithZone:(struct _NSZone *)zone __attribute__((unavailable));
-+ (instancetype)phases __attribute__((swift_name("init()")));
-@property (class, readonly, getter=shared) SplitApiKtor_client_coreHttpSendPipelinePhases *shared __attribute__((swift_name("shared")));
-@property (readonly) SplitApiKtor_utilsPipelinePhase *Before __attribute__((swift_name("Before")));
-@property (readonly) SplitApiKtor_utilsPipelinePhase *Engine __attribute__((swift_name("Engine")));
-@property (readonly) SplitApiKtor_utilsPipelinePhase *Monitoring __attribute__((swift_name("Monitoring")));
-@property (readonly) SplitApiKtor_utilsPipelinePhase *Receive __attribute__((swift_name("Receive")));
-@property (readonly) SplitApiKtor_utilsPipelinePhase *State __attribute__((swift_name("State")));
-@end
-
-
-/**
- * @note annotations
- *   kotlinx.serialization.ExperimentalSerializationApi
-*/
-__attribute__((swift_name("Kotlinx_serialization_coreSerializersModuleCollector")))
-@protocol SplitApiKotlinx_serialization_coreSerializersModuleCollector
-@required
-- (void)contextualKClass:(id<SplitApiKotlinKClass>)kClass provider:(id<SplitApiKotlinx_serialization_coreKSerializer> (^)(NSArray<id<SplitApiKotlinx_serialization_coreKSerializer>> *))provider __attribute__((swift_name("contextual(kClass:provider:)")));
-- (void)contextualKClass:(id<SplitApiKotlinKClass>)kClass serializer:(id<SplitApiKotlinx_serialization_coreKSerializer>)serializer __attribute__((swift_name("contextual(kClass:serializer:)")));
-- (void)polymorphicBaseClass:(id<SplitApiKotlinKClass>)baseClass actualClass:(id<SplitApiKotlinKClass>)actualClass actualSerializer:(id<SplitApiKotlinx_serialization_coreKSerializer>)actualSerializer __attribute__((swift_name("polymorphic(baseClass:actualClass:actualSerializer:)")));
-- (void)polymorphicDefaultBaseClass:(id<SplitApiKotlinKClass>)baseClass defaultDeserializerProvider:(id<SplitApiKotlinx_serialization_coreDeserializationStrategy> _Nullable (^)(NSString * _Nullable))defaultDeserializerProvider __attribute__((swift_name("polymorphicDefault(baseClass:defaultDeserializerProvider:)"))) __attribute__((deprecated("Deprecated in favor of function with more precise name: polymorphicDefaultDeserializer")));
-- (void)polymorphicDefaultDeserializerBaseClass:(id<SplitApiKotlinKClass>)baseClass defaultDeserializerProvider:(id<SplitApiKotlinx_serialization_coreDeserializationStrategy> _Nullable (^)(NSString * _Nullable))defaultDeserializerProvider __attribute__((swift_name("polymorphicDefaultDeserializer(baseClass:defaultDeserializerProvider:)")));
-- (void)polymorphicDefaultSerializerBaseClass:(id<SplitApiKotlinKClass>)baseClass defaultSerializerProvider:(id<SplitApiKotlinx_serialization_coreSerializationStrategy> _Nullable (^)(id))defaultSerializerProvider __attribute__((swift_name("polymorphicDefaultSerializer(baseClass:defaultSerializerProvider:)")));
-@end
-
-__attribute__((swift_name("KotlinKDeclarationContainer")))
-@protocol SplitApiKotlinKDeclarationContainer
-@required
-@end
-
-__attribute__((swift_name("KotlinKAnnotatedElement")))
-@protocol SplitApiKotlinKAnnotatedElement
-@required
-@end
-
-
-/**
- * @note annotations
- *   kotlin.SinceKotlin(version="1.1")
-*/
-__attribute__((swift_name("KotlinKClassifier")))
-@protocol SplitApiKotlinKClassifier
-@required
-@end
-
-__attribute__((swift_name("KotlinKClass")))
-@protocol SplitApiKotlinKClass <SplitApiKotlinKDeclarationContainer, SplitApiKotlinKAnnotatedElement, SplitApiKotlinKClassifier>
-@required
-
-/**
- * @note annotations
- *   kotlin.SinceKotlin(version="1.1")
-*/
-- (BOOL)isInstanceValue:(id _Nullable)value __attribute__((swift_name("isInstance(value:)")));
-@property (readonly) NSString * _Nullable qualifiedName __attribute__((swift_name("qualifiedName")));
-@property (readonly) NSString * _Nullable simpleName __attribute__((swift_name("simpleName")));
-@end
-
 __attribute__((objc_subclassing_restricted))
 __attribute__((swift_name("Ktor_httpHttpMethod")))
 @interface SplitApiKtor_httpHttpMethod : SplitApiBase
@@ -1724,6 +1346,21 @@ __attribute__((swift_name("Kotlinx_coroutines_coreJob")))
 @property (readonly) id<SplitApiKotlinx_coroutines_coreJob> _Nullable parent __attribute__((swift_name("parent")));
 @end
 
+__attribute__((swift_name("Ktor_utilsAttributes")))
+@protocol SplitApiKtor_utilsAttributes
+@required
+- (id)computeIfAbsentKey:(SplitApiKtor_utilsAttributeKey<id> *)key block:(id (^)(void))block __attribute__((swift_name("computeIfAbsent(key:block:)")));
+- (BOOL)containsKey:(SplitApiKtor_utilsAttributeKey<id> *)key __attribute__((swift_name("contains(key:)")));
+- (id)getKey_:(SplitApiKtor_utilsAttributeKey<id> *)key __attribute__((swift_name("get(key_:)")));
+- (id _Nullable)getOrNullKey:(SplitApiKtor_utilsAttributeKey<id> *)key __attribute__((swift_name("getOrNull(key:)")));
+- (void)putKey:(SplitApiKtor_utilsAttributeKey<id> *)key value:(id)value __attribute__((swift_name("put(key:value:)")));
+- (void)removeKey:(SplitApiKtor_utilsAttributeKey<id> *)key __attribute__((swift_name("remove(key:)")));
+- (void)setKey:(SplitApiKtor_utilsAttributeKey<id> *)key value:(id)value __attribute__((swift_name("set(key:value:)")));
+- (id)takeKey:(SplitApiKtor_utilsAttributeKey<id> *)key __attribute__((swift_name("take(key:)")));
+- (id _Nullable)takeOrNullKey:(SplitApiKtor_utilsAttributeKey<id> *)key __attribute__((swift_name("takeOrNull(key:)")));
+@property (readonly) NSArray<SplitApiKtor_utilsAttributeKey<id> *> *allKeys __attribute__((swift_name("allKeys")));
+@end
+
 __attribute__((objc_subclassing_restricted))
 __attribute__((swift_name("Ktor_httpHttpStatusCode")))
 @interface SplitApiKtor_httpHttpStatusCode : SplitApiBase <SplitApiKotlinComparable>
@@ -1780,6 +1417,112 @@ __attribute__((swift_name("Ktor_httpHttpProtocolVersion")))
 @property (readonly) NSString *name __attribute__((swift_name("name")));
 @end
 
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_client_coreHttpClientConfig")))
+@interface SplitApiKtor_client_coreHttpClientConfig<T> : SplitApiBase
+- (instancetype)init __attribute__((swift_name("init()"))) __attribute__((objc_designated_initializer));
++ (instancetype)new __attribute__((availability(swift, unavailable, message="use object initializers instead")));
+- (SplitApiKtor_client_coreHttpClientConfig<T> *)clone __attribute__((swift_name("clone()")));
+- (void)engineBlock:(void (^)(T))block __attribute__((swift_name("engine(block:)")));
+- (void)installClient:(SplitApiKtor_client_coreHttpClient *)client __attribute__((swift_name("install(client:)")));
+- (void)installPlugin:(id<SplitApiKtor_client_coreHttpClientPlugin>)plugin configure:(void (^)(id))configure __attribute__((swift_name("install(plugin:configure:)")));
+- (void)installKey:(NSString *)key block:(void (^)(SplitApiKtor_client_coreHttpClient *))block __attribute__((swift_name("install(key:block:)")));
+- (void)plusAssignOther:(SplitApiKtor_client_coreHttpClientConfig<T> *)other __attribute__((swift_name("plusAssign(other:)")));
+@property BOOL developmentMode __attribute__((swift_name("developmentMode"))) __attribute__((deprecated("Development mode is no longer required. The property will be removed in the future.")));
+@property BOOL expectSuccess __attribute__((swift_name("expectSuccess")));
+@property BOOL followRedirects __attribute__((swift_name("followRedirects")));
+@property BOOL useDefaultTransformers __attribute__((swift_name("useDefaultTransformers")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_eventsEvents")))
+@interface SplitApiKtor_eventsEvents : SplitApiBase
+- (instancetype)init __attribute__((swift_name("init()"))) __attribute__((objc_designated_initializer));
++ (instancetype)new __attribute__((availability(swift, unavailable, message="use object initializers instead")));
+- (void)raiseDefinition:(SplitApiKtor_eventsEventDefinition<id> *)definition value:(id _Nullable)value __attribute__((swift_name("raise(definition:value:)")));
+- (id<SplitApiKotlinx_coroutines_coreDisposableHandle>)subscribeDefinition:(SplitApiKtor_eventsEventDefinition<id> *)definition handler:(void (^)(id _Nullable))handler __attribute__((swift_name("subscribe(definition:handler:)")));
+- (void)unsubscribeDefinition:(SplitApiKtor_eventsEventDefinition<id> *)definition handler:(void (^)(id _Nullable))handler __attribute__((swift_name("unsubscribe(definition:handler:)")));
+@end
+
+__attribute__((swift_name("Ktor_utilsPipeline")))
+@interface SplitApiKtor_utilsPipeline<TSubject, TContext> : SplitApiBase
+- (instancetype)initWithPhases:(SplitApiKotlinArray<SplitApiKtor_utilsPipelinePhase *> *)phases __attribute__((swift_name("init(phases:)"))) __attribute__((objc_designated_initializer));
+- (instancetype)initWithPhase:(SplitApiKtor_utilsPipelinePhase *)phase interceptors:(NSArray<id<SplitApiKotlinSuspendFunction2>> *)interceptors __attribute__((swift_name("init(phase:interceptors:)"))) __attribute__((objc_designated_initializer));
+- (void)addPhasePhase:(SplitApiKtor_utilsPipelinePhase *)phase __attribute__((swift_name("addPhase(phase:)")));
+- (void)afterIntercepted __attribute__((swift_name("afterIntercepted()")));
+
+/**
+ * @note This method converts instances of CancellationException to errors.
+ * Other uncaught Kotlin exceptions are fatal.
+*/
+- (void)executeContext:(TContext)context subject:(TSubject)subject completionHandler:(void (^)(TSubject _Nullable, NSError * _Nullable))completionHandler __attribute__((swift_name("execute(context:subject:completionHandler:)")));
+- (void)insertPhaseAfterReference:(SplitApiKtor_utilsPipelinePhase *)reference phase:(SplitApiKtor_utilsPipelinePhase *)phase __attribute__((swift_name("insertPhaseAfter(reference:phase:)")));
+- (void)insertPhaseBeforeReference:(SplitApiKtor_utilsPipelinePhase *)reference phase:(SplitApiKtor_utilsPipelinePhase *)phase __attribute__((swift_name("insertPhaseBefore(reference:phase:)")));
+- (void)interceptPhase:(SplitApiKtor_utilsPipelinePhase *)phase block:(id<SplitApiKotlinSuspendFunction2>)block __attribute__((swift_name("intercept(phase:block:)")));
+- (NSArray<id<SplitApiKotlinSuspendFunction2>> *)interceptorsForPhasePhase:(SplitApiKtor_utilsPipelinePhase *)phase __attribute__((swift_name("interceptorsForPhase(phase:)")));
+- (void)mergeFrom:(SplitApiKtor_utilsPipeline<TSubject, TContext> *)from __attribute__((swift_name("merge(from:)")));
+- (void)mergePhasesFrom:(SplitApiKtor_utilsPipeline<TSubject, TContext> *)from __attribute__((swift_name("mergePhases(from:)")));
+- (void)resetFromFrom:(SplitApiKtor_utilsPipeline<TSubject, TContext> *)from __attribute__((swift_name("resetFrom(from:)")));
+- (NSString *)description __attribute__((swift_name("description()")));
+@property (readonly) id<SplitApiKtor_utilsAttributes> attributes __attribute__((swift_name("attributes")));
+@property (readonly) BOOL developmentMode __attribute__((swift_name("developmentMode")));
+@property (readonly, getter=isEmpty_) BOOL isEmpty __attribute__((swift_name("isEmpty")));
+@property (readonly) NSArray<SplitApiKtor_utilsPipelinePhase *> *items __attribute__((swift_name("items")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_client_coreHttpReceivePipeline")))
+@interface SplitApiKtor_client_coreHttpReceivePipeline : SplitApiKtor_utilsPipeline<SplitApiKtor_client_coreHttpResponse *, SplitApiKotlinUnit *>
+- (instancetype)initWithDevelopmentMode:(BOOL)developmentMode __attribute__((swift_name("init(developmentMode:)"))) __attribute__((objc_designated_initializer));
+- (instancetype)initWithPhases:(SplitApiKotlinArray<SplitApiKtor_utilsPipelinePhase *> *)phases __attribute__((swift_name("init(phases:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
+- (instancetype)initWithPhase:(SplitApiKtor_utilsPipelinePhase *)phase interceptors:(NSArray<id<SplitApiKotlinSuspendFunction2>> *)interceptors __attribute__((swift_name("init(phase:interceptors:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
+@property (class, readonly, getter=companion) SplitApiKtor_client_coreHttpReceivePipelinePhases *companion __attribute__((swift_name("companion")));
+@property (readonly) BOOL developmentMode __attribute__((swift_name("developmentMode")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_client_coreHttpRequestPipeline")))
+@interface SplitApiKtor_client_coreHttpRequestPipeline : SplitApiKtor_utilsPipeline<id, SplitApiKtor_client_coreHttpRequestBuilder *>
+- (instancetype)initWithDevelopmentMode:(BOOL)developmentMode __attribute__((swift_name("init(developmentMode:)"))) __attribute__((objc_designated_initializer));
+- (instancetype)initWithPhases:(SplitApiKotlinArray<SplitApiKtor_utilsPipelinePhase *> *)phases __attribute__((swift_name("init(phases:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
+- (instancetype)initWithPhase:(SplitApiKtor_utilsPipelinePhase *)phase interceptors:(NSArray<id<SplitApiKotlinSuspendFunction2>> *)interceptors __attribute__((swift_name("init(phase:interceptors:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
+@property (class, readonly, getter=companion) SplitApiKtor_client_coreHttpRequestPipelinePhases *companion __attribute__((swift_name("companion")));
+@property (readonly) BOOL developmentMode __attribute__((swift_name("developmentMode")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_client_coreHttpResponsePipeline")))
+@interface SplitApiKtor_client_coreHttpResponsePipeline : SplitApiKtor_utilsPipeline<SplitApiKtor_client_coreHttpResponseContainer *, SplitApiKtor_client_coreHttpClientCall *>
+- (instancetype)initWithDevelopmentMode:(BOOL)developmentMode __attribute__((swift_name("init(developmentMode:)"))) __attribute__((objc_designated_initializer));
+- (instancetype)initWithPhases:(SplitApiKotlinArray<SplitApiKtor_utilsPipelinePhase *> *)phases __attribute__((swift_name("init(phases:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
+- (instancetype)initWithPhase:(SplitApiKtor_utilsPipelinePhase *)phase interceptors:(NSArray<id<SplitApiKotlinSuspendFunction2>> *)interceptors __attribute__((swift_name("init(phase:interceptors:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
+@property (class, readonly, getter=companion) SplitApiKtor_client_coreHttpResponsePipelinePhases *companion __attribute__((swift_name("companion")));
+@property (readonly) BOOL developmentMode __attribute__((swift_name("developmentMode")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_client_coreHttpSendPipeline")))
+@interface SplitApiKtor_client_coreHttpSendPipeline : SplitApiKtor_utilsPipeline<id, SplitApiKtor_client_coreHttpRequestBuilder *>
+- (instancetype)initWithDevelopmentMode:(BOOL)developmentMode __attribute__((swift_name("init(developmentMode:)"))) __attribute__((objc_designated_initializer));
+- (instancetype)initWithPhases:(SplitApiKotlinArray<SplitApiKtor_utilsPipelinePhase *> *)phases __attribute__((swift_name("init(phases:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
+- (instancetype)initWithPhase:(SplitApiKtor_utilsPipelinePhase *)phase interceptors:(NSArray<id<SplitApiKotlinSuspendFunction2>> *)interceptors __attribute__((swift_name("init(phase:interceptors:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
+@property (class, readonly, getter=companion) SplitApiKtor_client_coreHttpSendPipelinePhases *companion __attribute__((swift_name("companion")));
+@property (readonly) BOOL developmentMode __attribute__((swift_name("developmentMode")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_client_coreProxyConfig")))
+@interface SplitApiKtor_client_coreProxyConfig : SplitApiBase
+- (instancetype)initWithUrl:(SplitApiKtor_httpUrl *)url __attribute__((swift_name("init(url:)"))) __attribute__((objc_designated_initializer));
+- (NSString *)description __attribute__((swift_name("description()")));
+@property (readonly) SplitApiKtor_httpUrl *url __attribute__((swift_name("url")));
+@end
+
+__attribute__((swift_name("KotlinCoroutineContextKey")))
+@protocol SplitApiKotlinCoroutineContextKey
+@required
+@end
+
 
 /**
  * @note annotations
@@ -1824,165 +1567,53 @@ __attribute__((swift_name("Kotlinx_coroutines_coreRunnable")))
 - (void)run __attribute__((swift_name("run()")));
 @end
 
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_utilsTypeInfo")))
-@interface SplitApiKtor_utilsTypeInfo : SplitApiBase
-- (instancetype)initWithType:(id<SplitApiKotlinKClass>)type kotlinType:(id<SplitApiKotlinKType> _Nullable)kotlinType __attribute__((swift_name("init(type:kotlinType:)"))) __attribute__((objc_designated_initializer));
-- (instancetype)initWithType:(id<SplitApiKotlinKClass>)type reifiedType:(id<SplitApiKotlinKType>)reifiedType kotlinType:(id<SplitApiKotlinKType> _Nullable)kotlinType __attribute__((swift_name("init(type:reifiedType:kotlinType:)"))) __attribute__((objc_designated_initializer)) __attribute__((deprecated("Use constructor without reifiedType parameter.")));
-- (BOOL)isEqual:(id _Nullable)other __attribute__((swift_name("isEqual(_:)")));
-- (NSUInteger)hash __attribute__((swift_name("hash()")));
-- (NSString *)description __attribute__((swift_name("description()")));
-@property (readonly) id<SplitApiKotlinKType> _Nullable kotlinType __attribute__((swift_name("kotlinType")));
-@property (readonly) id<SplitApiKotlinKClass> type __attribute__((swift_name("type")));
+
+/**
+ * @note annotations
+ *   kotlinx.serialization.ExperimentalSerializationApi
+*/
+__attribute__((swift_name("Kotlinx_serialization_coreSerializersModuleCollector")))
+@protocol SplitApiKotlinx_serialization_coreSerializersModuleCollector
+@required
+- (void)contextualKClass:(id<SplitApiKotlinKClass>)kClass provider:(id<SplitApiKotlinx_serialization_coreKSerializer> (^)(NSArray<id<SplitApiKotlinx_serialization_coreKSerializer>> *))provider __attribute__((swift_name("contextual(kClass:provider:)")));
+- (void)contextualKClass:(id<SplitApiKotlinKClass>)kClass serializer:(id<SplitApiKotlinx_serialization_coreKSerializer>)serializer __attribute__((swift_name("contextual(kClass:serializer:)")));
+- (void)polymorphicBaseClass:(id<SplitApiKotlinKClass>)baseClass actualClass:(id<SplitApiKotlinKClass>)actualClass actualSerializer:(id<SplitApiKotlinx_serialization_coreKSerializer>)actualSerializer __attribute__((swift_name("polymorphic(baseClass:actualClass:actualSerializer:)")));
+- (void)polymorphicDefaultBaseClass:(id<SplitApiKotlinKClass>)baseClass defaultDeserializerProvider:(id<SplitApiKotlinx_serialization_coreDeserializationStrategy> _Nullable (^)(NSString * _Nullable))defaultDeserializerProvider __attribute__((swift_name("polymorphicDefault(baseClass:defaultDeserializerProvider:)"))) __attribute__((deprecated("Deprecated in favor of function with more precise name: polymorphicDefaultDeserializer")));
+- (void)polymorphicDefaultDeserializerBaseClass:(id<SplitApiKotlinKClass>)baseClass defaultDeserializerProvider:(id<SplitApiKotlinx_serialization_coreDeserializationStrategy> _Nullable (^)(NSString * _Nullable))defaultDeserializerProvider __attribute__((swift_name("polymorphicDefaultDeserializer(baseClass:defaultDeserializerProvider:)")));
+- (void)polymorphicDefaultSerializerBaseClass:(id<SplitApiKotlinKClass>)baseClass defaultSerializerProvider:(id<SplitApiKotlinx_serialization_coreSerializationStrategy> _Nullable (^)(id))defaultSerializerProvider __attribute__((swift_name("polymorphicDefaultSerializer(baseClass:defaultSerializerProvider:)")));
 @end
 
-__attribute__((swift_name("Ktor_ioByteReadChannel")))
-@protocol SplitApiKtor_ioByteReadChannel
+__attribute__((swift_name("KotlinKDeclarationContainer")))
+@protocol SplitApiKotlinKDeclarationContainer
+@required
+@end
+
+__attribute__((swift_name("KotlinKAnnotatedElement")))
+@protocol SplitApiKotlinKAnnotatedElement
+@required
+@end
+
+
+/**
+ * @note annotations
+ *   kotlin.SinceKotlin(version="1.1")
+*/
+__attribute__((swift_name("KotlinKClassifier")))
+@protocol SplitApiKotlinKClassifier
+@required
+@end
+
+__attribute__((swift_name("KotlinKClass")))
+@protocol SplitApiKotlinKClass <SplitApiKotlinKDeclarationContainer, SplitApiKotlinKAnnotatedElement, SplitApiKotlinKClassifier>
 @required
 
 /**
- * @note This method converts instances of CancellationException to errors.
- * Other uncaught Kotlin exceptions are fatal.
+ * @note annotations
+ *   kotlin.SinceKotlin(version="1.1")
 */
-- (void)awaitContentMin:(int32_t)min completionHandler:(void (^)(SplitApiBoolean * _Nullable, NSError * _Nullable))completionHandler __attribute__((swift_name("awaitContent(min:completionHandler:)")));
-- (void)cancelCause_:(SplitApiKotlinThrowable * _Nullable)cause __attribute__((swift_name("cancel(cause_:)")));
-@property (readonly) SplitApiKotlinThrowable * _Nullable closedCause __attribute__((swift_name("closedCause")));
-@property (readonly) BOOL isClosedForRead __attribute__((swift_name("isClosedForRead")));
-@property (readonly) id<SplitApiKotlinx_io_coreSource> readBuffer __attribute__((swift_name("readBuffer")));
-@end
-
-__attribute__((swift_name("Ktor_utilsStringValuesBuilder")))
-@protocol SplitApiKtor_utilsStringValuesBuilder
-@required
-- (void)appendName:(NSString *)name value:(NSString *)value __attribute__((swift_name("append(name:value:)")));
-- (void)appendAllStringValues:(id<SplitApiKtor_utilsStringValues>)stringValues __attribute__((swift_name("appendAll(stringValues:)")));
-- (void)appendAllName:(NSString *)name values:(id)values __attribute__((swift_name("appendAll(name:values:)")));
-- (void)appendMissingStringValues:(id<SplitApiKtor_utilsStringValues>)stringValues __attribute__((swift_name("appendMissing(stringValues:)")));
-- (void)appendMissingName:(NSString *)name values:(id)values __attribute__((swift_name("appendMissing(name:values:)")));
-- (id<SplitApiKtor_utilsStringValues>)build __attribute__((swift_name("build()")));
-- (void)clear __attribute__((swift_name("clear()")));
-- (BOOL)containsName:(NSString *)name __attribute__((swift_name("contains(name:)")));
-- (BOOL)containsName:(NSString *)name value:(NSString *)value __attribute__((swift_name("contains(name:value:)")));
-- (NSSet<id<SplitApiKotlinMapEntry>> *)entries __attribute__((swift_name("entries()")));
-- (NSString * _Nullable)getName:(NSString *)name __attribute__((swift_name("get(name:)")));
-- (NSArray<NSString *> * _Nullable)getAllName:(NSString *)name __attribute__((swift_name("getAll(name:)")));
-- (BOOL)isEmpty __attribute__((swift_name("isEmpty()")));
-- (NSSet<NSString *> *)names __attribute__((swift_name("names()")));
-- (void)removeName:(NSString *)name __attribute__((swift_name("remove(name:)")));
-- (BOOL)removeName:(NSString *)name value:(NSString *)value __attribute__((swift_name("remove(name:value:)")));
-- (void)removeKeysWithNoEntries __attribute__((swift_name("removeKeysWithNoEntries()")));
-- (void)setName:(NSString *)name value:(NSString *)value __attribute__((swift_name("set(name:value:)")));
-@property (readonly) BOOL caseInsensitiveName __attribute__((swift_name("caseInsensitiveName")));
-@end
-
-__attribute__((swift_name("Ktor_utilsStringValuesBuilderImpl")))
-@interface SplitApiKtor_utilsStringValuesBuilderImpl : SplitApiBase <SplitApiKtor_utilsStringValuesBuilder>
-- (instancetype)initWithCaseInsensitiveName:(BOOL)caseInsensitiveName size:(int32_t)size __attribute__((swift_name("init(caseInsensitiveName:size:)"))) __attribute__((objc_designated_initializer));
-- (void)appendName:(NSString *)name value:(NSString *)value __attribute__((swift_name("append(name:value:)")));
-- (void)appendAllStringValues:(id<SplitApiKtor_utilsStringValues>)stringValues __attribute__((swift_name("appendAll(stringValues:)")));
-- (void)appendAllName:(NSString *)name values:(id)values __attribute__((swift_name("appendAll(name:values:)")));
-- (void)appendMissingStringValues:(id<SplitApiKtor_utilsStringValues>)stringValues __attribute__((swift_name("appendMissing(stringValues:)")));
-- (void)appendMissingName:(NSString *)name values:(id)values __attribute__((swift_name("appendMissing(name:values:)")));
-- (id<SplitApiKtor_utilsStringValues>)build __attribute__((swift_name("build()")));
-- (void)clear __attribute__((swift_name("clear()")));
-- (BOOL)containsName:(NSString *)name __attribute__((swift_name("contains(name:)")));
-- (BOOL)containsName:(NSString *)name value:(NSString *)value __attribute__((swift_name("contains(name:value:)")));
-- (NSSet<id<SplitApiKotlinMapEntry>> *)entries __attribute__((swift_name("entries()")));
-- (NSString * _Nullable)getName:(NSString *)name __attribute__((swift_name("get(name:)")));
-- (NSArray<NSString *> * _Nullable)getAllName:(NSString *)name __attribute__((swift_name("getAll(name:)")));
-- (BOOL)isEmpty __attribute__((swift_name("isEmpty()")));
-- (NSSet<NSString *> *)names __attribute__((swift_name("names()")));
-- (void)removeName:(NSString *)name __attribute__((swift_name("remove(name:)")));
-- (BOOL)removeName:(NSString *)name value:(NSString *)value __attribute__((swift_name("remove(name:value:)")));
-- (void)removeKeysWithNoEntries __attribute__((swift_name("removeKeysWithNoEntries()")));
-- (void)setName:(NSString *)name value:(NSString *)value __attribute__((swift_name("set(name:value:)")));
-
-/**
- * @note This method has protected visibility in Kotlin source and is intended only for use by subclasses.
-*/
-- (void)validateNameName:(NSString *)name __attribute__((swift_name("validateName(name:)")));
-
-/**
- * @note This method has protected visibility in Kotlin source and is intended only for use by subclasses.
-*/
-- (void)validateValueValue:(NSString *)value __attribute__((swift_name("validateValue(value:)")));
-@property (readonly) BOOL caseInsensitiveName __attribute__((swift_name("caseInsensitiveName")));
-
-/**
- * @note This property has protected visibility in Kotlin source and is intended only for use by subclasses.
-*/
-@property (readonly) SplitApiMutableDictionary<NSString *, NSMutableArray<NSString *> *> *values __attribute__((swift_name("values")));
-@end
-
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_httpHeadersBuilder")))
-@interface SplitApiKtor_httpHeadersBuilder : SplitApiKtor_utilsStringValuesBuilderImpl
-- (instancetype)initWithSize:(int32_t)size __attribute__((swift_name("init(size:)"))) __attribute__((objc_designated_initializer));
-- (instancetype)initWithCaseInsensitiveName:(BOOL)caseInsensitiveName size:(int32_t)size __attribute__((swift_name("init(caseInsensitiveName:size:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
-- (id<SplitApiKtor_httpHeaders>)build __attribute__((swift_name("build()")));
-
-/**
- * @note This method has protected visibility in Kotlin source and is intended only for use by subclasses.
-*/
-- (void)validateNameName:(NSString *)name __attribute__((swift_name("validateName(name:)")));
-
-/**
- * @note This method has protected visibility in Kotlin source and is intended only for use by subclasses.
-*/
-- (void)validateValueValue:(NSString *)value __attribute__((swift_name("validateValue(value:)")));
-@end
-
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_client_coreHttpRequestBuilder.Companion")))
-@interface SplitApiKtor_client_coreHttpRequestBuilderCompanion : SplitApiBase
-+ (instancetype)alloc __attribute__((unavailable));
-+ (instancetype)allocWithZone:(struct _NSZone *)zone __attribute__((unavailable));
-+ (instancetype)companion __attribute__((swift_name("init()")));
-@property (class, readonly, getter=shared) SplitApiKtor_client_coreHttpRequestBuilderCompanion *shared __attribute__((swift_name("shared")));
-@end
-
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_httpURLBuilder")))
-@interface SplitApiKtor_httpURLBuilder : SplitApiBase
-- (instancetype)initWithProtocol:(SplitApiKtor_httpURLProtocol * _Nullable)protocol host:(NSString *)host port:(int32_t)port user:(NSString * _Nullable)user password:(NSString * _Nullable)password pathSegments:(NSArray<NSString *> *)pathSegments parameters:(id<SplitApiKtor_httpParameters>)parameters fragment:(NSString *)fragment trailingQuery:(BOOL)trailingQuery __attribute__((swift_name("init(protocol:host:port:user:password:pathSegments:parameters:fragment:trailingQuery:)"))) __attribute__((objc_designated_initializer));
-@property (class, readonly, getter=companion) SplitApiKtor_httpURLBuilderCompanion *companion __attribute__((swift_name("companion")));
-- (SplitApiKtor_httpUrl *)build __attribute__((swift_name("build()")));
-- (NSString *)buildString __attribute__((swift_name("buildString()")));
-- (NSString *)description __attribute__((swift_name("description()")));
-@property NSString *encodedFragment __attribute__((swift_name("encodedFragment")));
-@property id<SplitApiKtor_httpParametersBuilder> encodedParameters __attribute__((swift_name("encodedParameters")));
-@property NSString * _Nullable encodedPassword __attribute__((swift_name("encodedPassword")));
-@property NSArray<NSString *> *encodedPathSegments __attribute__((swift_name("encodedPathSegments")));
-@property NSString * _Nullable encodedUser __attribute__((swift_name("encodedUser")));
-@property NSString *fragment __attribute__((swift_name("fragment")));
-@property NSString *host __attribute__((swift_name("host")));
-@property (readonly) id<SplitApiKtor_httpParametersBuilder> parameters __attribute__((swift_name("parameters")));
-@property NSString * _Nullable password __attribute__((swift_name("password")));
-@property NSArray<NSString *> *pathSegments __attribute__((swift_name("pathSegments")));
-@property int32_t port __attribute__((swift_name("port")));
-@property SplitApiKtor_httpURLProtocol *protocol __attribute__((swift_name("protocol")));
-@property SplitApiKtor_httpURLProtocol * _Nullable protocolOrNull __attribute__((swift_name("protocolOrNull")));
-@property BOOL trailingQuery __attribute__((swift_name("trailingQuery")));
-@property NSString * _Nullable user __attribute__((swift_name("user")));
-@end
-
-__attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_client_coreHttpClientCall.Companion")))
-@interface SplitApiKtor_client_coreHttpClientCallCompanion : SplitApiBase
-+ (instancetype)alloc __attribute__((unavailable));
-+ (instancetype)allocWithZone:(struct _NSZone *)zone __attribute__((unavailable));
-+ (instancetype)companion __attribute__((swift_name("init()")));
-@property (class, readonly, getter=shared) SplitApiKtor_client_coreHttpClientCallCompanion *shared __attribute__((swift_name("shared")));
-@end
-
-__attribute__((swift_name("Ktor_client_coreHttpRequest")))
-@protocol SplitApiKtor_client_coreHttpRequest <SplitApiKtor_httpHttpMessage, SplitApiKotlinx_coroutines_coreCoroutineScope>
-@required
-@property (readonly) id<SplitApiKtor_utilsAttributes> attributes __attribute__((swift_name("attributes")));
-@property (readonly) SplitApiKtor_client_coreHttpClientCall *call __attribute__((swift_name("call")));
-@property (readonly) SplitApiKtor_httpOutgoingContent *content __attribute__((swift_name("content")));
-@property (readonly) SplitApiKtor_httpHttpMethod *method __attribute__((swift_name("method")));
-@property (readonly) SplitApiKtor_httpUrl *url __attribute__((swift_name("url")));
+- (BOOL)isInstanceValue:(id _Nullable)value __attribute__((swift_name("isInstance(value:)")));
+@property (readonly) NSString * _Nullable qualifiedName __attribute__((swift_name("qualifiedName")));
+@property (readonly) NSString * _Nullable simpleName __attribute__((swift_name("simpleName")));
 @end
 
 __attribute__((objc_subclassing_restricted))
@@ -2001,6 +1632,22 @@ __attribute__((swift_name("Ktor_httpHttpMethod.Companion")))
 @property (readonly) SplitApiKtor_httpHttpMethod *Patch __attribute__((swift_name("Patch")));
 @property (readonly) SplitApiKtor_httpHttpMethod *Post __attribute__((swift_name("Post")));
 @property (readonly) SplitApiKtor_httpHttpMethod *Put __attribute__((swift_name("Put")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_utilsAttributeKey")))
+@interface SplitApiKtor_utilsAttributeKey<T> : SplitApiBase
+
+/**
+ * @note annotations
+ *   kotlin.jvm.JvmOverloads
+*/
+- (instancetype)initWithName:(NSString *)name type:(SplitApiKtor_utilsTypeInfo *)type __attribute__((swift_name("init(name:type:)"))) __attribute__((objc_designated_initializer));
+- (SplitApiKtor_utilsAttributeKey<T> *)doCopyName:(NSString *)name type:(SplitApiKtor_utilsTypeInfo *)type __attribute__((swift_name("doCopy(name:type:)")));
+- (BOOL)isEqual:(id _Nullable)other __attribute__((swift_name("isEqual(_:)")));
+- (NSUInteger)hash __attribute__((swift_name("hash()")));
+- (NSString *)description __attribute__((swift_name("description()")));
+@property (readonly) NSString *name __attribute__((swift_name("name")));
 @end
 
 __attribute__((swift_name("Ktor_httpHeaderValueWithParameters")))
@@ -2031,6 +1678,12 @@ __attribute__((swift_name("Ktor_httpContentType")))
 - (SplitApiKtor_httpContentType *)withoutParameters __attribute__((swift_name("withoutParameters()")));
 @property (readonly) NSString *contentSubtype __attribute__((swift_name("contentSubtype")));
 @property (readonly) NSString *contentType __attribute__((swift_name("contentType")));
+@end
+
+__attribute__((swift_name("Kotlinx_coroutines_coreDisposableHandle")))
+@protocol SplitApiKotlinx_coroutines_coreDisposableHandle
+@required
+- (void)dispose __attribute__((swift_name("dispose()")));
 @end
 
 
@@ -2230,65 +1883,214 @@ __attribute__((swift_name("Ktor_httpHttpProtocolVersion.Companion")))
 @property (readonly) SplitApiKtor_httpHttpProtocolVersion *SPDY_3 __attribute__((swift_name("SPDY_3")));
 @end
 
-__attribute__((swift_name("KotlinKType")))
-@protocol SplitApiKotlinKType
+__attribute__((swift_name("Ktor_client_coreHttpClientPlugin")))
+@protocol SplitApiKtor_client_coreHttpClientPlugin
 @required
-
-/**
- * @note annotations
- *   kotlin.SinceKotlin(version="1.1")
-*/
-@property (readonly) NSArray<SplitApiKotlinKTypeProjection *> *arguments __attribute__((swift_name("arguments")));
-
-/**
- * @note annotations
- *   kotlin.SinceKotlin(version="1.1")
-*/
-@property (readonly) id<SplitApiKotlinKClassifier> _Nullable classifier __attribute__((swift_name("classifier")));
-@property (readonly) BOOL isMarkedNullable __attribute__((swift_name("isMarkedNullable")));
+- (void)installPlugin:(id)plugin scope:(SplitApiKtor_client_coreHttpClient *)scope __attribute__((swift_name("install(plugin:scope:)")));
+- (id)prepareBlock:(void (^)(id))block __attribute__((swift_name("prepare(block:)")));
+@property (readonly) SplitApiKtor_utilsAttributeKey<id> *key __attribute__((swift_name("key")));
 @end
 
-__attribute__((swift_name("Kotlinx_io_coreRawSource")))
-@protocol SplitApiKotlinx_io_coreRawSource <SplitApiKotlinAutoCloseable>
-@required
-- (int64_t)readAtMostToSink:(SplitApiKotlinx_io_coreBuffer *)sink byteCount:(int64_t)byteCount __attribute__((swift_name("readAtMostTo(sink:byteCount:)")));
-@end
-
-__attribute__((swift_name("Kotlinx_io_coreSource")))
-@protocol SplitApiKotlinx_io_coreSource <SplitApiKotlinx_io_coreRawSource>
-@required
-- (BOOL)exhausted __attribute__((swift_name("exhausted()")));
-- (id<SplitApiKotlinx_io_coreSource>)peek __attribute__((swift_name("peek()")));
-- (int32_t)readAtMostToSink:(SplitApiKotlinByteArray *)sink startIndex:(int32_t)startIndex endIndex:(int32_t)endIndex __attribute__((swift_name("readAtMostTo(sink:startIndex:endIndex:)")));
-- (int8_t)readByte __attribute__((swift_name("readByte()")));
-- (int32_t)readInt __attribute__((swift_name("readInt()")));
-- (int64_t)readLong __attribute__((swift_name("readLong()")));
-- (int16_t)readShort __attribute__((swift_name("readShort()")));
-- (void)readToSink:(id<SplitApiKotlinx_io_coreRawSink>)sink byteCount:(int64_t)byteCount __attribute__((swift_name("readTo(sink:byteCount:)")));
-- (BOOL)requestByteCount:(int64_t)byteCount __attribute__((swift_name("request(byteCount:)")));
-- (void)requireByteCount:(int64_t)byteCount __attribute__((swift_name("require(byteCount:)")));
-- (void)skipByteCount:(int64_t)byteCount __attribute__((swift_name("skip(byteCount:)")));
-- (int64_t)transferToSink:(id<SplitApiKotlinx_io_coreRawSink>)sink __attribute__((swift_name("transferTo(sink:)")));
-
-/**
- * @note annotations
- *   kotlinx.io.InternalIoApi
-*/
-@property (readonly) SplitApiKotlinx_io_coreBuffer *buffer __attribute__((swift_name("buffer")));
+__attribute__((swift_name("Ktor_eventsEventDefinition")))
+@interface SplitApiKtor_eventsEventDefinition<T> : SplitApiBase
+- (instancetype)init __attribute__((swift_name("init()"))) __attribute__((objc_designated_initializer));
++ (instancetype)new __attribute__((availability(swift, unavailable, message="use object initializers instead")));
 @end
 
 __attribute__((objc_subclassing_restricted))
-__attribute__((swift_name("Ktor_httpURLBuilder.Companion")))
-@interface SplitApiKtor_httpURLBuilderCompanion : SplitApiBase
-+ (instancetype)alloc __attribute__((unavailable));
-+ (instancetype)allocWithZone:(struct _NSZone *)zone __attribute__((unavailable));
-+ (instancetype)companion __attribute__((swift_name("init()")));
-@property (class, readonly, getter=shared) SplitApiKtor_httpURLBuilderCompanion *shared __attribute__((swift_name("shared")));
+__attribute__((swift_name("Ktor_utilsPipelinePhase")))
+@interface SplitApiKtor_utilsPipelinePhase : SplitApiBase
+- (instancetype)initWithName:(NSString *)name __attribute__((swift_name("init(name:)"))) __attribute__((objc_designated_initializer));
+- (NSString *)description __attribute__((swift_name("description()")));
+@property (readonly) NSString *name __attribute__((swift_name("name")));
 @end
 
-__attribute__((swift_name("Ktor_httpParametersBuilder")))
-@protocol SplitApiKtor_httpParametersBuilder <SplitApiKtor_utilsStringValuesBuilder>
+__attribute__((swift_name("KotlinFunction")))
+@protocol SplitApiKotlinFunction
 @required
+@end
+
+__attribute__((swift_name("KotlinSuspendFunction2")))
+@protocol SplitApiKotlinSuspendFunction2 <SplitApiKotlinFunction>
+@required
+
+/**
+ * @note This method converts instances of CancellationException to errors.
+ * Other uncaught Kotlin exceptions are fatal.
+*/
+- (void)invokeP1:(id _Nullable)p1 p2:(id _Nullable)p2 completionHandler:(void (^)(id _Nullable_result, NSError * _Nullable))completionHandler __attribute__((swift_name("invoke(p1:p2:completionHandler:)")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_client_coreHttpReceivePipeline.Phases")))
+@interface SplitApiKtor_client_coreHttpReceivePipelinePhases : SplitApiBase
++ (instancetype)alloc __attribute__((unavailable));
++ (instancetype)allocWithZone:(struct _NSZone *)zone __attribute__((unavailable));
++ (instancetype)phases __attribute__((swift_name("init()")));
+@property (class, readonly, getter=shared) SplitApiKtor_client_coreHttpReceivePipelinePhases *shared __attribute__((swift_name("shared")));
+@property (readonly) SplitApiKtor_utilsPipelinePhase *After __attribute__((swift_name("After")));
+@property (readonly) SplitApiKtor_utilsPipelinePhase *Before __attribute__((swift_name("Before")));
+@property (readonly) SplitApiKtor_utilsPipelinePhase *State __attribute__((swift_name("State")));
+@end
+
+__attribute__((swift_name("Ktor_httpHttpMessage")))
+@protocol SplitApiKtor_httpHttpMessage
+@required
+@property (readonly, getter=headers_) id<SplitApiKtor_httpHeaders> headers __attribute__((swift_name("headers")));
+@end
+
+__attribute__((swift_name("Ktor_client_coreHttpResponse")))
+@interface SplitApiKtor_client_coreHttpResponse : SplitApiBase <SplitApiKtor_httpHttpMessage, SplitApiKotlinx_coroutines_coreCoroutineScope>
+- (instancetype)init __attribute__((swift_name("init()"))) __attribute__((objc_designated_initializer));
++ (instancetype)new __attribute__((availability(swift, unavailable, message="use object initializers instead")));
+- (NSString *)description __attribute__((swift_name("description()")));
+@property (readonly) SplitApiKtor_client_coreHttpClientCall *call __attribute__((swift_name("call")));
+@property (readonly) id<SplitApiKtor_ioByteReadChannel> rawContent __attribute__((swift_name("rawContent")));
+@property (readonly) SplitApiKtor_utilsGMTDate *requestTime __attribute__((swift_name("requestTime")));
+@property (readonly) SplitApiKtor_utilsGMTDate *responseTime __attribute__((swift_name("responseTime")));
+@property (readonly) SplitApiKtor_httpHttpStatusCode *status __attribute__((swift_name("status")));
+@property (readonly) SplitApiKtor_httpHttpProtocolVersion *version __attribute__((swift_name("version")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("KotlinUnit")))
+@interface SplitApiKotlinUnit : SplitApiBase
++ (instancetype)alloc __attribute__((unavailable));
++ (instancetype)allocWithZone:(struct _NSZone *)zone __attribute__((unavailable));
++ (instancetype)unit __attribute__((swift_name("init()")));
+@property (class, readonly, getter=shared) SplitApiKotlinUnit *shared __attribute__((swift_name("shared")));
+- (NSString *)description __attribute__((swift_name("description()")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_client_coreHttpRequestPipeline.Phases")))
+@interface SplitApiKtor_client_coreHttpRequestPipelinePhases : SplitApiBase
++ (instancetype)alloc __attribute__((unavailable));
++ (instancetype)allocWithZone:(struct _NSZone *)zone __attribute__((unavailable));
++ (instancetype)phases __attribute__((swift_name("init()")));
+@property (class, readonly, getter=shared) SplitApiKtor_client_coreHttpRequestPipelinePhases *shared __attribute__((swift_name("shared")));
+@property (readonly) SplitApiKtor_utilsPipelinePhase *Before __attribute__((swift_name("Before")));
+@property (readonly) SplitApiKtor_utilsPipelinePhase *Render __attribute__((swift_name("Render")));
+@property (readonly) SplitApiKtor_utilsPipelinePhase *Send __attribute__((swift_name("Send")));
+@property (readonly) SplitApiKtor_utilsPipelinePhase *State __attribute__((swift_name("State")));
+@property (readonly) SplitApiKtor_utilsPipelinePhase *Transform __attribute__((swift_name("Transform")));
+@end
+
+__attribute__((swift_name("Ktor_httpHttpMessageBuilder")))
+@protocol SplitApiKtor_httpHttpMessageBuilder
+@required
+@property (readonly, getter=headers_) SplitApiKtor_httpHeadersBuilder *headers __attribute__((swift_name("headers")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_client_coreHttpRequestBuilder")))
+@interface SplitApiKtor_client_coreHttpRequestBuilder : SplitApiBase <SplitApiKtor_httpHttpMessageBuilder>
+- (instancetype)init __attribute__((swift_name("init()"))) __attribute__((objc_designated_initializer));
++ (instancetype)new __attribute__((availability(swift, unavailable, message="use object initializers instead")));
+@property (class, readonly, getter=companion) SplitApiKtor_client_coreHttpRequestBuilderCompanion *companion __attribute__((swift_name("companion")));
+- (SplitApiKtor_client_coreHttpRequestData *)build __attribute__((swift_name("build()")));
+- (id _Nullable)getCapabilityOrNullKey:(id<SplitApiKtor_client_coreHttpClientEngineCapability>)key __attribute__((swift_name("getCapabilityOrNull(key:)")));
+- (void)setAttributesBlock:(void (^)(id<SplitApiKtor_utilsAttributes>))block __attribute__((swift_name("setAttributes(block:)")));
+- (void)setCapabilityKey:(id<SplitApiKtor_client_coreHttpClientEngineCapability>)key capability:(id)capability __attribute__((swift_name("setCapability(key:capability:)")));
+- (SplitApiKtor_client_coreHttpRequestBuilder *)takeFromBuilder:(SplitApiKtor_client_coreHttpRequestBuilder *)builder __attribute__((swift_name("takeFrom(builder:)")));
+- (SplitApiKtor_client_coreHttpRequestBuilder *)takeFromWithExecutionContextBuilder:(SplitApiKtor_client_coreHttpRequestBuilder *)builder __attribute__((swift_name("takeFromWithExecutionContext(builder:)")));
+- (void)urlBlock:(void (^)(SplitApiKtor_httpURLBuilder *, SplitApiKtor_httpURLBuilder *))block __attribute__((swift_name("url(block:)")));
+@property (readonly) id<SplitApiKtor_utilsAttributes> attributes __attribute__((swift_name("attributes")));
+@property id body __attribute__((swift_name("body")));
+@property SplitApiKtor_utilsTypeInfo * _Nullable bodyType __attribute__((swift_name("bodyType")));
+@property (readonly) id<SplitApiKotlinx_coroutines_coreJob> executionContext __attribute__((swift_name("executionContext")));
+@property (readonly, getter=headers_) SplitApiKtor_httpHeadersBuilder *headers __attribute__((swift_name("headers")));
+@property SplitApiKtor_httpHttpMethod *method __attribute__((swift_name("method")));
+@property (readonly) SplitApiKtor_httpURLBuilder *url __attribute__((swift_name("url")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_client_coreHttpResponsePipeline.Phases")))
+@interface SplitApiKtor_client_coreHttpResponsePipelinePhases : SplitApiBase
++ (instancetype)alloc __attribute__((unavailable));
++ (instancetype)allocWithZone:(struct _NSZone *)zone __attribute__((unavailable));
++ (instancetype)phases __attribute__((swift_name("init()")));
+@property (class, readonly, getter=shared) SplitApiKtor_client_coreHttpResponsePipelinePhases *shared __attribute__((swift_name("shared")));
+@property (readonly) SplitApiKtor_utilsPipelinePhase *After __attribute__((swift_name("After")));
+@property (readonly) SplitApiKtor_utilsPipelinePhase *Parse __attribute__((swift_name("Parse")));
+@property (readonly) SplitApiKtor_utilsPipelinePhase *Receive __attribute__((swift_name("Receive")));
+@property (readonly) SplitApiKtor_utilsPipelinePhase *State __attribute__((swift_name("State")));
+@property (readonly) SplitApiKtor_utilsPipelinePhase *Transform __attribute__((swift_name("Transform")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_client_coreHttpResponseContainer")))
+@interface SplitApiKtor_client_coreHttpResponseContainer : SplitApiBase
+- (instancetype)initWithExpectedType:(SplitApiKtor_utilsTypeInfo *)expectedType response:(id)response __attribute__((swift_name("init(expectedType:response:)"))) __attribute__((objc_designated_initializer));
+- (SplitApiKtor_client_coreHttpResponseContainer *)doCopyExpectedType:(SplitApiKtor_utilsTypeInfo *)expectedType response:(id)response __attribute__((swift_name("doCopy(expectedType:response:)")));
+- (BOOL)isEqual:(id _Nullable)other __attribute__((swift_name("isEqual(_:)")));
+- (NSUInteger)hash __attribute__((swift_name("hash()")));
+- (NSString *)description __attribute__((swift_name("description()")));
+@property (readonly) SplitApiKtor_utilsTypeInfo *expectedType __attribute__((swift_name("expectedType")));
+@property (readonly) id response __attribute__((swift_name("response")));
+@end
+
+__attribute__((swift_name("Ktor_client_coreHttpClientCall")))
+@interface SplitApiKtor_client_coreHttpClientCall : SplitApiBase <SplitApiKotlinx_coroutines_coreCoroutineScope>
+- (instancetype)initWithClient:(SplitApiKtor_client_coreHttpClient *)client __attribute__((swift_name("init(client:)"))) __attribute__((objc_designated_initializer));
+- (instancetype)initWithClient:(SplitApiKtor_client_coreHttpClient *)client requestData:(SplitApiKtor_client_coreHttpRequestData *)requestData responseData:(SplitApiKtor_client_coreHttpResponseData *)responseData __attribute__((swift_name("init(client:requestData:responseData:)"))) __attribute__((objc_designated_initializer));
+@property (class, readonly, getter=companion) SplitApiKtor_client_coreHttpClientCallCompanion *companion __attribute__((swift_name("companion")));
+
+/**
+ * @note This method converts instances of CancellationException to errors.
+ * Other uncaught Kotlin exceptions are fatal.
+*/
+- (void)bodyInfo:(SplitApiKtor_utilsTypeInfo *)info completionHandler:(void (^)(id _Nullable, NSError * _Nullable))completionHandler __attribute__((swift_name("body(info:completionHandler:)")));
+
+/**
+ * @note This method converts instances of CancellationException to errors.
+ * Other uncaught Kotlin exceptions are fatal.
+*/
+- (void)bodyNullableInfo:(SplitApiKtor_utilsTypeInfo *)info completionHandler:(void (^)(id _Nullable_result, NSError * _Nullable))completionHandler __attribute__((swift_name("bodyNullable(info:completionHandler:)")));
+
+/**
+ * @note This method converts instances of CancellationException to errors.
+ * Other uncaught Kotlin exceptions are fatal.
+ * @note This method has protected visibility in Kotlin source and is intended only for use by subclasses.
+*/
+- (void)getResponseContentWithCompletionHandler:(void (^)(id<SplitApiKtor_ioByteReadChannel> _Nullable, NSError * _Nullable))completionHandler __attribute__((swift_name("getResponseContent(completionHandler:)")));
+- (NSString *)description __attribute__((swift_name("description()")));
+
+/**
+ * @note This property has protected visibility in Kotlin source and is intended only for use by subclasses.
+*/
+@property (readonly) BOOL allowDoubleReceive __attribute__((swift_name("allowDoubleReceive")));
+@property (readonly) id<SplitApiKtor_utilsAttributes> attributes __attribute__((swift_name("attributes")));
+@property (readonly) SplitApiKtor_client_coreHttpClient *client __attribute__((swift_name("client")));
+@property (readonly) id<SplitApiKotlinCoroutineContext> coroutineContext __attribute__((swift_name("coroutineContext")));
+@property id<SplitApiKtor_client_coreHttpRequest> request __attribute__((swift_name("request")));
+@property SplitApiKtor_client_coreHttpResponse *response __attribute__((swift_name("response")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_client_coreHttpSendPipeline.Phases")))
+@interface SplitApiKtor_client_coreHttpSendPipelinePhases : SplitApiBase
++ (instancetype)alloc __attribute__((unavailable));
++ (instancetype)allocWithZone:(struct _NSZone *)zone __attribute__((unavailable));
++ (instancetype)phases __attribute__((swift_name("init()")));
+@property (class, readonly, getter=shared) SplitApiKtor_client_coreHttpSendPipelinePhases *shared __attribute__((swift_name("shared")));
+@property (readonly) SplitApiKtor_utilsPipelinePhase *Before __attribute__((swift_name("Before")));
+@property (readonly) SplitApiKtor_utilsPipelinePhase *Engine __attribute__((swift_name("Engine")));
+@property (readonly) SplitApiKtor_utilsPipelinePhase *Monitoring __attribute__((swift_name("Monitoring")));
+@property (readonly) SplitApiKtor_utilsPipelinePhase *Receive __attribute__((swift_name("Receive")));
+@property (readonly) SplitApiKtor_utilsPipelinePhase *State __attribute__((swift_name("State")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_utilsTypeInfo")))
+@interface SplitApiKtor_utilsTypeInfo : SplitApiBase
+- (instancetype)initWithType:(id<SplitApiKotlinKClass>)type kotlinType:(id<SplitApiKotlinKType> _Nullable)kotlinType __attribute__((swift_name("init(type:kotlinType:)"))) __attribute__((objc_designated_initializer));
+- (instancetype)initWithType:(id<SplitApiKotlinKClass>)type reifiedType:(id<SplitApiKotlinKType>)reifiedType kotlinType:(id<SplitApiKotlinKType> _Nullable)kotlinType __attribute__((swift_name("init(type:reifiedType:kotlinType:)"))) __attribute__((objc_designated_initializer)) __attribute__((deprecated("Use constructor without reifiedType parameter.")));
+- (BOOL)isEqual:(id _Nullable)other __attribute__((swift_name("isEqual(_:)")));
+- (NSUInteger)hash __attribute__((swift_name("hash()")));
+- (NSString *)description __attribute__((swift_name("description()")));
+@property (readonly) id<SplitApiKotlinKType> _Nullable kotlinType __attribute__((swift_name("kotlinType")));
+@property (readonly) id<SplitApiKotlinKClass> type __attribute__((swift_name("type")));
 @end
 
 __attribute__((objc_subclassing_restricted))
@@ -2376,6 +2178,216 @@ __attribute__((swift_name("Ktor_utilsMonth.Companion")))
 @property (class, readonly, getter=shared) SplitApiKtor_utilsMonthCompanion *shared __attribute__((swift_name("shared")));
 - (SplitApiKtor_utilsMonth *)fromOrdinal:(int32_t)ordinal __attribute__((swift_name("from(ordinal:)")));
 - (SplitApiKtor_utilsMonth *)fromValue:(NSString *)value __attribute__((swift_name("from(value:)")));
+@end
+
+__attribute__((swift_name("Ktor_ioByteReadChannel")))
+@protocol SplitApiKtor_ioByteReadChannel
+@required
+
+/**
+ * @note This method converts instances of CancellationException to errors.
+ * Other uncaught Kotlin exceptions are fatal.
+*/
+- (void)awaitContentMin:(int32_t)min completionHandler:(void (^)(SplitApiBoolean * _Nullable, NSError * _Nullable))completionHandler __attribute__((swift_name("awaitContent(min:completionHandler:)")));
+- (void)cancelCause_:(SplitApiKotlinThrowable * _Nullable)cause __attribute__((swift_name("cancel(cause_:)")));
+@property (readonly) SplitApiKotlinThrowable * _Nullable closedCause __attribute__((swift_name("closedCause")));
+@property (readonly) BOOL isClosedForRead __attribute__((swift_name("isClosedForRead")));
+@property (readonly) id<SplitApiKotlinx_io_coreSource> readBuffer __attribute__((swift_name("readBuffer")));
+@end
+
+__attribute__((swift_name("Ktor_utilsStringValuesBuilder")))
+@protocol SplitApiKtor_utilsStringValuesBuilder
+@required
+- (void)appendName:(NSString *)name value:(NSString *)value __attribute__((swift_name("append(name:value:)")));
+- (void)appendAllStringValues:(id<SplitApiKtor_utilsStringValues>)stringValues __attribute__((swift_name("appendAll(stringValues:)")));
+- (void)appendAllName:(NSString *)name values:(id)values __attribute__((swift_name("appendAll(name:values:)")));
+- (void)appendMissingStringValues:(id<SplitApiKtor_utilsStringValues>)stringValues __attribute__((swift_name("appendMissing(stringValues:)")));
+- (void)appendMissingName:(NSString *)name values:(id)values __attribute__((swift_name("appendMissing(name:values:)")));
+- (id<SplitApiKtor_utilsStringValues>)build __attribute__((swift_name("build()")));
+- (void)clear __attribute__((swift_name("clear()")));
+- (BOOL)containsName:(NSString *)name __attribute__((swift_name("contains(name:)")));
+- (BOOL)containsName:(NSString *)name value:(NSString *)value __attribute__((swift_name("contains(name:value:)")));
+- (NSSet<id<SplitApiKotlinMapEntry>> *)entries __attribute__((swift_name("entries()")));
+- (NSString * _Nullable)getName:(NSString *)name __attribute__((swift_name("get(name:)")));
+- (NSArray<NSString *> * _Nullable)getAllName:(NSString *)name __attribute__((swift_name("getAll(name:)")));
+- (BOOL)isEmpty __attribute__((swift_name("isEmpty()")));
+- (NSSet<NSString *> *)names __attribute__((swift_name("names()")));
+- (void)removeName:(NSString *)name __attribute__((swift_name("remove(name:)")));
+- (BOOL)removeName:(NSString *)name value:(NSString *)value __attribute__((swift_name("remove(name:value:)")));
+- (void)removeKeysWithNoEntries __attribute__((swift_name("removeKeysWithNoEntries()")));
+- (void)setName:(NSString *)name value:(NSString *)value __attribute__((swift_name("set(name:value:)")));
+@property (readonly) BOOL caseInsensitiveName __attribute__((swift_name("caseInsensitiveName")));
+@end
+
+__attribute__((swift_name("Ktor_utilsStringValuesBuilderImpl")))
+@interface SplitApiKtor_utilsStringValuesBuilderImpl : SplitApiBase <SplitApiKtor_utilsStringValuesBuilder>
+- (instancetype)initWithCaseInsensitiveName:(BOOL)caseInsensitiveName size:(int32_t)size __attribute__((swift_name("init(caseInsensitiveName:size:)"))) __attribute__((objc_designated_initializer));
+- (void)appendName:(NSString *)name value:(NSString *)value __attribute__((swift_name("append(name:value:)")));
+- (void)appendAllStringValues:(id<SplitApiKtor_utilsStringValues>)stringValues __attribute__((swift_name("appendAll(stringValues:)")));
+- (void)appendAllName:(NSString *)name values:(id)values __attribute__((swift_name("appendAll(name:values:)")));
+- (void)appendMissingStringValues:(id<SplitApiKtor_utilsStringValues>)stringValues __attribute__((swift_name("appendMissing(stringValues:)")));
+- (void)appendMissingName:(NSString *)name values:(id)values __attribute__((swift_name("appendMissing(name:values:)")));
+- (id<SplitApiKtor_utilsStringValues>)build __attribute__((swift_name("build()")));
+- (void)clear __attribute__((swift_name("clear()")));
+- (BOOL)containsName:(NSString *)name __attribute__((swift_name("contains(name:)")));
+- (BOOL)containsName:(NSString *)name value:(NSString *)value __attribute__((swift_name("contains(name:value:)")));
+- (NSSet<id<SplitApiKotlinMapEntry>> *)entries __attribute__((swift_name("entries()")));
+- (NSString * _Nullable)getName:(NSString *)name __attribute__((swift_name("get(name:)")));
+- (NSArray<NSString *> * _Nullable)getAllName:(NSString *)name __attribute__((swift_name("getAll(name:)")));
+- (BOOL)isEmpty __attribute__((swift_name("isEmpty()")));
+- (NSSet<NSString *> *)names __attribute__((swift_name("names()")));
+- (void)removeName:(NSString *)name __attribute__((swift_name("remove(name:)")));
+- (BOOL)removeName:(NSString *)name value:(NSString *)value __attribute__((swift_name("remove(name:value:)")));
+- (void)removeKeysWithNoEntries __attribute__((swift_name("removeKeysWithNoEntries()")));
+- (void)setName:(NSString *)name value:(NSString *)value __attribute__((swift_name("set(name:value:)")));
+
+/**
+ * @note This method has protected visibility in Kotlin source and is intended only for use by subclasses.
+*/
+- (void)validateNameName:(NSString *)name __attribute__((swift_name("validateName(name:)")));
+
+/**
+ * @note This method has protected visibility in Kotlin source and is intended only for use by subclasses.
+*/
+- (void)validateValueValue:(NSString *)value __attribute__((swift_name("validateValue(value:)")));
+@property (readonly) BOOL caseInsensitiveName __attribute__((swift_name("caseInsensitiveName")));
+
+/**
+ * @note This property has protected visibility in Kotlin source and is intended only for use by subclasses.
+*/
+@property (readonly) SplitApiMutableDictionary<NSString *, NSMutableArray<NSString *> *> *values __attribute__((swift_name("values")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_httpHeadersBuilder")))
+@interface SplitApiKtor_httpHeadersBuilder : SplitApiKtor_utilsStringValuesBuilderImpl
+- (instancetype)initWithSize:(int32_t)size __attribute__((swift_name("init(size:)"))) __attribute__((objc_designated_initializer));
+- (instancetype)initWithCaseInsensitiveName:(BOOL)caseInsensitiveName size:(int32_t)size __attribute__((swift_name("init(caseInsensitiveName:size:)"))) __attribute__((objc_designated_initializer)) __attribute__((unavailable));
+- (id<SplitApiKtor_httpHeaders>)build __attribute__((swift_name("build()")));
+
+/**
+ * @note This method has protected visibility in Kotlin source and is intended only for use by subclasses.
+*/
+- (void)validateNameName:(NSString *)name __attribute__((swift_name("validateName(name:)")));
+
+/**
+ * @note This method has protected visibility in Kotlin source and is intended only for use by subclasses.
+*/
+- (void)validateValueValue:(NSString *)value __attribute__((swift_name("validateValue(value:)")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_client_coreHttpRequestBuilder.Companion")))
+@interface SplitApiKtor_client_coreHttpRequestBuilderCompanion : SplitApiBase
++ (instancetype)alloc __attribute__((unavailable));
++ (instancetype)allocWithZone:(struct _NSZone *)zone __attribute__((unavailable));
++ (instancetype)companion __attribute__((swift_name("init()")));
+@property (class, readonly, getter=shared) SplitApiKtor_client_coreHttpRequestBuilderCompanion *shared __attribute__((swift_name("shared")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_httpURLBuilder")))
+@interface SplitApiKtor_httpURLBuilder : SplitApiBase
+- (instancetype)initWithProtocol:(SplitApiKtor_httpURLProtocol * _Nullable)protocol host:(NSString *)host port:(int32_t)port user:(NSString * _Nullable)user password:(NSString * _Nullable)password pathSegments:(NSArray<NSString *> *)pathSegments parameters:(id<SplitApiKtor_httpParameters>)parameters fragment:(NSString *)fragment trailingQuery:(BOOL)trailingQuery __attribute__((swift_name("init(protocol:host:port:user:password:pathSegments:parameters:fragment:trailingQuery:)"))) __attribute__((objc_designated_initializer));
+@property (class, readonly, getter=companion) SplitApiKtor_httpURLBuilderCompanion *companion __attribute__((swift_name("companion")));
+- (SplitApiKtor_httpUrl *)build __attribute__((swift_name("build()")));
+- (NSString *)buildString __attribute__((swift_name("buildString()")));
+- (NSString *)description __attribute__((swift_name("description()")));
+@property NSString *encodedFragment __attribute__((swift_name("encodedFragment")));
+@property id<SplitApiKtor_httpParametersBuilder> encodedParameters __attribute__((swift_name("encodedParameters")));
+@property NSString * _Nullable encodedPassword __attribute__((swift_name("encodedPassword")));
+@property NSArray<NSString *> *encodedPathSegments __attribute__((swift_name("encodedPathSegments")));
+@property NSString * _Nullable encodedUser __attribute__((swift_name("encodedUser")));
+@property NSString *fragment __attribute__((swift_name("fragment")));
+@property NSString *host __attribute__((swift_name("host")));
+@property (readonly) id<SplitApiKtor_httpParametersBuilder> parameters __attribute__((swift_name("parameters")));
+@property NSString * _Nullable password __attribute__((swift_name("password")));
+@property NSArray<NSString *> *pathSegments __attribute__((swift_name("pathSegments")));
+@property int32_t port __attribute__((swift_name("port")));
+@property SplitApiKtor_httpURLProtocol *protocol __attribute__((swift_name("protocol")));
+@property SplitApiKtor_httpURLProtocol * _Nullable protocolOrNull __attribute__((swift_name("protocolOrNull")));
+@property BOOL trailingQuery __attribute__((swift_name("trailingQuery")));
+@property NSString * _Nullable user __attribute__((swift_name("user")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_client_coreHttpClientCall.Companion")))
+@interface SplitApiKtor_client_coreHttpClientCallCompanion : SplitApiBase
++ (instancetype)alloc __attribute__((unavailable));
++ (instancetype)allocWithZone:(struct _NSZone *)zone __attribute__((unavailable));
++ (instancetype)companion __attribute__((swift_name("init()")));
+@property (class, readonly, getter=shared) SplitApiKtor_client_coreHttpClientCallCompanion *shared __attribute__((swift_name("shared")));
+@end
+
+__attribute__((swift_name("Ktor_client_coreHttpRequest")))
+@protocol SplitApiKtor_client_coreHttpRequest <SplitApiKtor_httpHttpMessage, SplitApiKotlinx_coroutines_coreCoroutineScope>
+@required
+@property (readonly) id<SplitApiKtor_utilsAttributes> attributes __attribute__((swift_name("attributes")));
+@property (readonly) SplitApiKtor_client_coreHttpClientCall *call __attribute__((swift_name("call")));
+@property (readonly) SplitApiKtor_httpOutgoingContent *content __attribute__((swift_name("content")));
+@property (readonly) SplitApiKtor_httpHttpMethod *method __attribute__((swift_name("method")));
+@property (readonly) SplitApiKtor_httpUrl *url __attribute__((swift_name("url")));
+@end
+
+__attribute__((swift_name("KotlinKType")))
+@protocol SplitApiKotlinKType
+@required
+
+/**
+ * @note annotations
+ *   kotlin.SinceKotlin(version="1.1")
+*/
+@property (readonly) NSArray<SplitApiKotlinKTypeProjection *> *arguments __attribute__((swift_name("arguments")));
+
+/**
+ * @note annotations
+ *   kotlin.SinceKotlin(version="1.1")
+*/
+@property (readonly) id<SplitApiKotlinKClassifier> _Nullable classifier __attribute__((swift_name("classifier")));
+@property (readonly) BOOL isMarkedNullable __attribute__((swift_name("isMarkedNullable")));
+@end
+
+__attribute__((swift_name("Kotlinx_io_coreRawSource")))
+@protocol SplitApiKotlinx_io_coreRawSource <SplitApiKotlinAutoCloseable>
+@required
+- (int64_t)readAtMostToSink:(SplitApiKotlinx_io_coreBuffer *)sink byteCount:(int64_t)byteCount __attribute__((swift_name("readAtMostTo(sink:byteCount:)")));
+@end
+
+__attribute__((swift_name("Kotlinx_io_coreSource")))
+@protocol SplitApiKotlinx_io_coreSource <SplitApiKotlinx_io_coreRawSource>
+@required
+- (BOOL)exhausted __attribute__((swift_name("exhausted()")));
+- (id<SplitApiKotlinx_io_coreSource>)peek __attribute__((swift_name("peek()")));
+- (int32_t)readAtMostToSink:(SplitApiKotlinByteArray *)sink startIndex:(int32_t)startIndex endIndex:(int32_t)endIndex __attribute__((swift_name("readAtMostTo(sink:startIndex:endIndex:)")));
+- (int8_t)readByte __attribute__((swift_name("readByte()")));
+- (int32_t)readInt __attribute__((swift_name("readInt()")));
+- (int64_t)readLong __attribute__((swift_name("readLong()")));
+- (int16_t)readShort __attribute__((swift_name("readShort()")));
+- (void)readToSink:(id<SplitApiKotlinx_io_coreRawSink>)sink byteCount:(int64_t)byteCount __attribute__((swift_name("readTo(sink:byteCount:)")));
+- (BOOL)requestByteCount:(int64_t)byteCount __attribute__((swift_name("request(byteCount:)")));
+- (void)requireByteCount:(int64_t)byteCount __attribute__((swift_name("require(byteCount:)")));
+- (void)skipByteCount:(int64_t)byteCount __attribute__((swift_name("skip(byteCount:)")));
+- (int64_t)transferToSink:(id<SplitApiKotlinx_io_coreRawSink>)sink __attribute__((swift_name("transferTo(sink:)")));
+
+/**
+ * @note annotations
+ *   kotlinx.io.InternalIoApi
+*/
+@property (readonly) SplitApiKotlinx_io_coreBuffer *buffer __attribute__((swift_name("buffer")));
+@end
+
+__attribute__((objc_subclassing_restricted))
+__attribute__((swift_name("Ktor_httpURLBuilder.Companion")))
+@interface SplitApiKtor_httpURLBuilderCompanion : SplitApiBase
++ (instancetype)alloc __attribute__((unavailable));
++ (instancetype)allocWithZone:(struct _NSZone *)zone __attribute__((unavailable));
++ (instancetype)companion __attribute__((swift_name("init()")));
+@property (class, readonly, getter=shared) SplitApiKtor_httpURLBuilderCompanion *shared __attribute__((swift_name("shared")));
+@end
+
+__attribute__((swift_name("Ktor_httpParametersBuilder")))
+@protocol SplitApiKtor_httpParametersBuilder <SplitApiKtor_utilsStringValuesBuilder>
+@required
 @end
 
 
